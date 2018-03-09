@@ -1,17 +1,22 @@
 /// A node.js commandline example
 
-if (process.argv.length < 2) { printHelp(); return }
+if (process.argv.length < 2) {
+  printHelp();
+  return;
+}
 
 const printHelp = () => {
-  const invocation = process.argv.map(arg => {
-    if (arg.endsWith('node')) return process.argv0
-    if (arg.endsWith('.js')) {
-      console.log(process.env.PWD)
-      return arg.replace(`${process.env.PWD}/`, '')
-    }
-    if (arg === 'help') return ''
-    return arg
-  }).join(' ')
+  const invocation = process.argv
+    .map(arg => {
+      if (arg.endsWith('node')) return process.argv0;
+      if (arg.endsWith('.js')) {
+        console.log(process.env.PWD);
+        return arg.replace(`${process.env.PWD}/`, '');
+      }
+      if (arg === 'help') return '';
+      return arg;
+    })
+    .join(' ');
 
   console.error(`
   Assert, retract, or select facts from a living room server
@@ -27,25 +32,24 @@ const printHelp = () => {
   Retract a fact
 
       ${invocation}retract "Gorog the barbarian is at (0.5, 0.7)"
-  `)
-}
+  `);
+};
 
-const Room = require('../build/room.js')
-const room = new Room() // Defaults to http://localhost:3000
+const Room = require('../build/room.js');
+const room = new Room(); // Defaults to http://localhost:3000
 
-const facts = process.argv.slice(3)[0]
+const facts = process.argv.slice(3)[0];
 
 switch (process.argv[2]) {
   case 'assert':
-    room.assert(facts)
+    room.assert(facts);
     break;
   case 'retract':
-    room.retract(facts)
+    room.retract(facts);
     break;
   case 'select':
-    room.select(facts)
-        .do(console.log)
+    room.select(facts).do(console.log);
     break;
   default:
-    printHelp()
+    printHelp();
 }
