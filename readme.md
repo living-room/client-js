@@ -2,7 +2,7 @@
 
 A universal javascript client that talks to a [living room server](https://github.com/jedahan/living-room-server)
 
-It works in node or the browser, make sure you have a server listening on localhost:3000 or change LIVING_ROOM_URI to point to your server
+It works in node or the browser, and listens to server at the environment variable ROOMDB_URI or the default value of `http://localhost:3000`
 
 # commandline app
 
