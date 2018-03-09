@@ -1,8 +1,8 @@
-import commonjs from 'rollup-plugin-commonjs'
-import builtins from 'rollup-plugin-node-builtins'
-import resolve from 'rollup-plugin-node-resolve'
-import globals from 'rollup-plugin-node-globals'
-import pkg from './package.json'
+import commonjs from 'rollup-plugin-commonjs';
+import builtins from 'rollup-plugin-node-builtins';
+import resolve from 'rollup-plugin-node-resolve';
+import globals from 'rollup-plugin-node-globals';
+import pkg from './package.json';
 
 export default {
   external: ['node-fetch', 'socket.io-client'],
@@ -19,7 +19,7 @@ export default {
   },
   plugins: [
     resolve({
-       // pass custom options to the resolve plugin
+      // pass custom options to the resolve plugin
       jsnext: true,
       main: true,
       preferBuiltins: true
@@ -31,4 +31,4 @@ export default {
     }),
     globals()
   ]
-}
+};
