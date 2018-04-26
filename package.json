@@ -35,10 +35,7 @@
     "room:assert": "npm run room -- assert",
     "room:retract": "npm run room -- retract",
     "room:select": "npm run room -- select",
-    "room:subscribe": "npm run room -- subscribe",
-    "systemd": "npm-run-all systemd:remove systemd:add",
-    "systemd:add": "NODE=`which node` sudo -E bash -c '$NODE service.js add'",
-    "systemd:remove": "NODE=`which node` sudo -E bash -c '$NODE service.js remove'"
+    "room:subscribe": "npm run room -- subscribe"
   },
   "dependencies": {
     "@living-room/service-js": "^0.4.0",
