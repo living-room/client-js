@@ -4,6 +4,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 
 var fetch = _interopDefault(require('node-fetch'));
 var io = _interopDefault(require('socket.io-client'));
+var bonjour = _interopDefault(require('nbonjour'));
 
 function getEnv (key) {
   if (typeof process !== 'undefined') return process.env[key]
@@ -11,8 +12,21 @@ function getEnv (key) {
 
 class Room {
   constructor (host) {
-    this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000';
-    this._socket = io.connect(this._host);
+    this._http_host = host || getEnv('LIVING_ROOM_HTTP_HOST') || 'http://localhost:3000';
+    this._socketio_host = host || getEnv('LIVING_ROOM_SOCKETIO_HOST') || 'http://localhost:3000';
+    this._bonjour = bonjour.create();
+
+    const sethost = ({host, type, port}) => {
+      this[`_${type}_host`] = `http://${host}:${port}`;
+      if (type === 'socketio') this._socket = io.connect(this._socketio_host);
+    };
+
+    this._browsers = [
+      this._bonjour.find({ type: 'http', subtypes: ['livingroom']}, sethost),
+      this._bonjour.find({ type: 'socketio', subtypes: ['livingroom']}, sethost)
+    ];
+
+    this._socket = io.connect(this._socketio_host);
   }
 
   /**
@@ -50,7 +64,7 @@ class Room {
       })
     }
 
-    const uri = `${this._host}/${endpoint}`;
+    const uri = `${this._http_host}/${endpoint}`;
 
     const post = {
       method: 'POST',

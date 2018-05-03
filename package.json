@@ -1,6 +1,6 @@
 {
   "name": "@living-room/client-js",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "node.js and browser client for living room server",
   "main": "build/room.js",
   "browser": "build/room.browser.js",
@@ -40,6 +40,7 @@
   "dependencies": {
     "@living-room/service-js": "^0.4.0",
     "iohook": "^0.1.15",
+    "nbonjour": "^3.6.1",
     "node-fetch": "^2.1.2",
     "prettier-standard": "^8.0.0",
     "socket.io-client": "^2.0.4"
