@@ -2876,10 +2876,8 @@
 
 
             function reduceToSingleString(output, base, braces) {
-              var numLinesEst = 0;
               var length = output.reduce(function(prev, cur) {
-                numLinesEst++;
-                if (cur.indexOf('\n') >= 0) numLinesEst++;
+                if (cur.indexOf('\n') >= 0) ;
                 return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
               }, 0);
 
@@ -4744,8 +4742,9 @@
                 this._socketio_host = host || getEnv('LIVING_ROOM_SOCKETIO_HOST') || 'http://localhost:3000';
                 this._bonjour = nbonjour.create();
 
-                const sethost = ({host, type, port}) => {
-                  this[`_${type}_host`] = `http://${host}:${port}`;
+                const sethost = ({host, type, port, subtypes}) => {
+                  const subtype = subtypes[subtypes.length - 1];
+                  this[`_${type}_host`] = `${type}://${host}:${port}`;
                   if (type === 'socketio') this._socket = io.connect(this._socketio_host);
                 };
 

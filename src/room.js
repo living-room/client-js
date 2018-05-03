@@ -23,7 +23,6 @@ export default class Room {
       const subtype = subtypes[subtypes.length - 1]
       this[`_${type}_host`] = `${type}://${host}:${port}`
       if (type === 'socketio') this._socket = io.connect(this._socketio_host)
-      console.dir(`setting new host
     }
 
     this._browsers = [
