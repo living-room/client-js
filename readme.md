@@ -35,6 +35,13 @@ curl -d 'facts=alice is a human animal at (0.33, 0.22)' localhost:3000/assert
 
 The visualization should now show alice near the top left of the screen
 
+We have some convinient npm scripts to do this:
+
+```bash
+npm run assert 'there is a doggo here'
+npm run select 'there is a \$what here' # remember to escape '$' because of shell
+```
+
 ## 'Sense' some more animals
 
 Coming up with creative names and animal species and locations is tedious, so we've created a fake sensor that 'sees' other animals for us. In **[examples/sensor.js][example-sensor]** we wrote a small script that sees random animals and prints them out on the commandline. Try running it!

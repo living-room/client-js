@@ -4738,22 +4738,17 @@
 
             class Room {
               constructor (host) {
-                this._http_host = host || getEnv('LIVING_ROOM_HTTP_HOST') || 'http://localhost:3000';
-                this._socketio_host = host || getEnv('LIVING_ROOM_SOCKETIO_HOST') || 'http://localhost:3000';
-                this._bonjour = nbonjour.create();
+                this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000';
+                const serviceDefinition = { type: 'http', subtypes: ['livingroom']};
 
-                const sethost = ({host, type, port, subtypes}) => {
-                  const subtype = subtypes[subtypes.length - 1];
-                  this[`_${type}_host`] = `${type}://${host}:${port}`;
-                  if (type === 'socketio') this._socket = io.connect(this._socketio_host);
-                };
+                this._browser = nbonjour.create().find(serviceDefinition, service => {
+                  const {type, host, port} = service;
+                  this._host = `${type}://${host}:${port}`;
+                  console.log(`set new host to ${this._host}`);
+                  this._socket = io.connect(this._host);
+                });
 
-                this._browsers = [
-                  this._bonjour.find({ type: 'http', subtypes: ['livingroom']}, sethost),
-                  this._bonjour.find({ type: 'socketio', subtypes: ['livingroom']}, sethost)
-                ];
-
-                this._socket = io.connect(this._socketio_host);
+                this._socket = io.connect(this._host);
               }
 
               /**
@@ -4791,7 +4786,7 @@
                   })
                 }
 
-                const uri = `${this._http_host}/${endpoint}`;
+                const uri = `${this._host}/${endpoint}`;
 
                 const post = {
                   method: 'POST',

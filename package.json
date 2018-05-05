@@ -1,6 +1,6 @@
 {
   "name": "@living-room/client-js",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "node.js and browser client for living room server",
   "main": "build/room.js",
   "browser": "build/room.browser.js",
@@ -14,16 +14,15 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "service": "node -e 'require(\"@living-room/service-js/server.js\")'",
+    "service": "node -e 'require(\"@living-room/service-js/service.js\")'",
     "examples": "serve --cors examples",
     "format": "prettier-standard 'src/*.js' 'examples/*/*.js'",
     "start": "npm-run-all -p watch service examples",
-    "subscribe": "node examples/commandline.js subscribe",
     "room": "node examples/commandline.js",
-    "room:assert": "npm run room -- assert",
-    "room:retract": "npm run room -- retract",
-    "room:select": "npm run room -- select",
-    "room:subscribe": "npm run room -- subscribe"
+    "assert": "node examples/commandline.js assert",
+    "retract": "node examples/commandline.js retract",
+    "select": "node examples/commandline.js select",
+    "subscribe": "node examples/commandline.js subscribe"
   },
   "dependencies": {
     "@living-room/service-js": "^0.4.3",
