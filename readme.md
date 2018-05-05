@@ -2,7 +2,7 @@
 
 A javascript package that makes it easy to talk with a [living room server](https://github.com/living-room/service-js)
 
-It works in node or the browser, and looks for a server at `LIVING_ROOM_HOST` (default `localhost:3000`.
+It works in node or the browser, and looks for a server at `LIVING_ROOM_HOST` (default `localhost:3000`).
 
 # getting started
 
@@ -109,10 +109,14 @@ const room = new Room() // you can pass in the uri here or in LIVING_ROOM_HOST
 
 room
   .assert(`You am a doggo`)
+room
   .assert(`I am a pupper`)
+room
   .select(`$who am a $what`)
-  .do(({who, what}) => {
-    console.log(`roomdb thinks ${who.name} is a ${what.str}`)
+  .then(({assertions}) => {
+    assertions.forEach(({who, what}) => {
+      console.log(`roomdb thinks ${who.name} is a ${what.str}`)
+    })
   })
 ```
 
@@ -122,7 +126,7 @@ from [examples/animals/animals.js](./examples/animals/animals.js)
 // This is a demo of subscribing to a server query.
 // It queries for animals in the database and draws them on screen.
 
-const room = new window.room() // assumes RoomDB http server running on http://localhost:3000
+const room = new window.LivingRoom() // assumes RoomDB http server running on http://localhost:3000
 const context = canvas.getContext('2d')
 let characters = new Map()
 let animalFacts = []
@@ -130,13 +134,14 @@ let animalFacts = []
 // Set up some demo data
 room
   .assert(`Simba is a cat animal at (0.5, 0.1)`)
+room
   .assert(`Timon is a meerkat animal at (0.4, 0.6)`)
+room
   .assert(`Pumba is a warthog animal at (0.55, 0.6)`)
 
 // Query for locations of animals and update our local list
 room
-  .subscribe(`$name is a $animal animal at ($x, $y)`)
-  .on(({selection, assertions, retractions}) => {
+  .subscribe(`$name is a $animal animal at ($x, $y)`, ({selection, assertions, retractions}) => {
     assertions.forEach(animal => {
       let [label, x, y] = [animal.name.word, animal.x.value, animal.y.value]
       characters.set(label, {x, y})

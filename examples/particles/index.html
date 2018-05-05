@@ -10,11 +10,10 @@
     <script src="js/phaser.min.js"></script>
     <script src="js/banana-emitter.js"></script>
     <script>
-      const room = new window.room() // assumes RoomDB http server running on http://localhost:3000
+      const room = new window.LivingRoom() // assumes RoomDB http server running on http://localhost:3000
       let characters = new Map()
       room
-        .subscribe(`$name is a label at ($x, $y)`)
-        .on(({assertions}) => {
+        .subscribe(`$name is a label at ($x, $y)`, ({assertions}) => {
           assertions.forEach(animal => {
             let [label, x, y] = [animal.name.id, animal.x.value, animal.y.value]
             characters.set(label, {x, y})

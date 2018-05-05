@@ -18,16 +18,17 @@ export default [{
     }
   }
 }, {
-  external: ['node-fetch', 'socket.io-client'],
+  external: ['node-fetch', 'socket.io-client', 'nbonjour'],
   input: 'src/room.js',
   output: {
-    name: 'room',
+    name: 'LivingRoom',
     file: 'build/room.browser.js',
-    format: 'umd',
+    format: 'iife',
     sourcemap: true,
     globals: {
       'node-fetch': 'fetch',
-      'socket.io-client': 'io'
+      'socket.io-client': 'io',
+      'bonjour': 'nbonjour'
     }
   },
   plugins: [

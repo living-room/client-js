@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@living-room/service-js": "^0.4.3",
+    "nbonjour": "^3.6.1",
     "npm-run-all": "^4.1.2",
     "prettier-standard": "^8.0.1",
     "rollup": "^0.58.2",

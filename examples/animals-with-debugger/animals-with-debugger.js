@@ -5,7 +5,7 @@
 // Then, if another program sees a "bugnet" (a debugger), it will also
 // print debug output at the location of the bugnet.
 
-const room = new window.room() // assumes LivingRoom server running on http://localhost:3000
+const room = new window.LivingRoom() // assumes LivingRoom server running on http://localhost:3000
 const context = canvas.getContext('2d')
 let characters = new Map()
 let animalFacts = []
@@ -14,11 +14,13 @@ let bugnets = []
 // Set up some demo data
 room
   .assert(`Simba is a cat animal at (0.5, 0.1)`)
+room
   .assert(`Timon is a meerkat animal at (0.4, 0.6)`)
+room
   .assert(`Pumba is a warthog animal at (0.55, 0.6)`)
 
 // Query for locations of animals and update our local list
-room.subscribe(`$name is a $animal animal at ($x, $y)`).on(({ assertions }) => {
+room.subscribe(`$name is a $animal animal at ($x, $y)`, ({ assertions }) => {
   assertions.forEach(animal => {
     let [label, x, y] = [animal.name.word, animal.x.value, animal.y.value]
     characters.set(label, { x, y })
@@ -30,8 +32,7 @@ room.subscribe(`$name is a $animal animal at ($x, $y)`).on(({ assertions }) => {
 
 // Query for "bugnets", locations where someone has physically placed a debugger.
 room
-  .subscribe(`there is a $bugnet bugnet at $x $y $xx $yy`)
-  .on(({ assertions }) => {
+  .subscribe(`there is a $bugnet bugnet at $x $y $xx $yy`, ({ assertions }) => {
     bugnets = []
 
     assertions.forEach(bugnet => {

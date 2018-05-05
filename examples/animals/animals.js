@@ -1,7 +1,7 @@
 // This is a demo of subscribing to a server query.
 // It queries for animals in the database and draws them on screen.
 
-const room = new window.room(`http://${window.location.hostname}:3000`)
+const room = new window.LivingRoom(`http://${window.location.hostname}:3000`)
 const context = canvas.getContext('2d')
 
 let animals = new Map()
