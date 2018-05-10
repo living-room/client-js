@@ -302,7 +302,7 @@ var LivingRoom = (function (fetch,io,bonjour) {
                       console.error(`No server listening on ${uri}`);
                       console.error(`Try 'npm start' to run a local service`);
                     } else {
-                      consol.error(error);
+                      console.error(error);
                     }
                   })
               }
