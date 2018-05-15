@@ -88,10 +88,13 @@ export default class Room {
       .then(response => response.json())
       .catch(error => {
         if (error.code === 'ECONNREFUSED') {
-          console.error(`No server listening on ${uri}`);
-          console.error(`Try 'npm start' to run a local service`);
+          let customError = new Error(
+            `No server listening on ${uri}. Try 'npm start' to run a local service.`
+          );
+          customError.code = 'NOTLISTENING';
+          throw customError;
         } else {
-          console.error(error);
+          throw error;
         }
       });
   }
