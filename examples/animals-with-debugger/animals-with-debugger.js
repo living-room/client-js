@@ -12,12 +12,9 @@ let animalFacts = []
 let bugnets = []
 
 // Set up some demo data
-room
-  .assert(`Simba is a cat animal at (0.5, 0.1)`)
-room
-  .assert(`Timon is a meerkat animal at (0.4, 0.6)`)
-room
-  .assert(`Pumba is a warthog animal at (0.55, 0.6)`)
+room.assert(`Simba is a cat animal at (0.5, 0.1)`)
+room.assert(`Timon is a meerkat animal at (0.4, 0.6)`)
+room.assert(`Pumba is a warthog animal at (0.55, 0.6)`)
 
 // Query for locations of animals and update our local list
 room.subscribe(`$name is a $animal animal at ($x, $y)`, ({ assertions }) => {
@@ -31,8 +28,9 @@ room.subscribe(`$name is a $animal animal at ($x, $y)`, ({ assertions }) => {
 })
 
 // Query for "bugnets", locations where someone has physically placed a debugger.
-room
-  .subscribe(`there is a $bugnet bugnet at $x $y $xx $yy`, ({ assertions }) => {
+room.subscribe(
+  `there is a $bugnet bugnet at $x $y $xx $yy`,
+  ({ assertions }) => {
     bugnets = []
 
     assertions.forEach(bugnet => {
@@ -50,7 +48,8 @@ room
       // bugnets we saw, but that got too messy.
       bugnets = [{ bugnetType, x, y, xx, yy, description }]
     })
-  })
+  }
+)
 
 async function draw (time) {
   // if the window is resized, change the canvas to fill the window
