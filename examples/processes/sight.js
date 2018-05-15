@@ -14,17 +14,21 @@ module.exports = room => {
       `$aspecies can see $distance`
     ],
     // why is this async?
-    async ({assertions, retractions}) => {
+    async ({ assertions, retractions }) => {
       assertions.forEach(async ({ a, b, ax, ay, bx, by, distance }) => {
         if (a.word === b.word) return
-        const [dx, dy] = [100 * (ax.value - bx.value), 100 * (ay.value - by.value)]
+        const [dx, dy] = [
+          100 * (ax.value - bx.value),
+          100 * (ay.value - by.value)
+        ]
         const seesFact = `${a.word} sees ${b.word}`
 
-        if ((dx * dx) + (dy * dy) < ($distance * $distance)) {
+        if (dx * dx + dy * dy < $distance * $distance) {
           room.assert(seesFact).then(console.dir)
         } else {
           room.retract(seesFact).then(console.dir)
         }
       })
-    })
+    }
+  )
 }

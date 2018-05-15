@@ -17,17 +17,16 @@ export default class Room {
   constructor (host) {
     this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
-    const serviceDefinition = { type: 'http', subtypes: ['livingroom']}
+    const serviceDefinition = { type: 'http', subtypes: ['livingroom'] }
 
     if (bonjour) {
       this._browser = bonjour.create().find(serviceDefinition, service => {
-        const {type, host, port} = service
+        const { type, host, port } = service
         this._host = `${type}://${host}:${port}`
         console.log(`set new host to ${this._host}`)
         this._socket = io.connect(this._host)
       })
     }
-
     this._socket = io.connect(this._host)
   }
 
