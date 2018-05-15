@@ -29,7 +29,7 @@ class Room {
 
   connect () {
     this._socket = io.connect(this._host);
-    if (window) {
+    if (typeof window === 'object') {
       this._socket.on('reconnect', () => {
         window.location.reload(true);
       });
