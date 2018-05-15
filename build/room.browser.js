@@ -238,6 +238,7 @@ var LivingRoom = (function (fetch,io,bonjour) {
             class Room {
               constructor (host) {
                 this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000';
+                if (!this._host.startsWith('http://')) this._host = `http://${this._host}`;
                 const serviceDefinition = { type: 'http', subtypes: ['livingroom']};
 
                 if (bonjour) {
