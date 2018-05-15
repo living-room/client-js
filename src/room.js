@@ -19,7 +19,7 @@ export default class Room {
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
     const serviceDefinition = { type: 'http', subtypes: ['livingroom'] }
 
-    if (bonjour) {
+    if (false) {
       this._browser = bonjour.create().find(serviceDefinition, service => {
         const { type, host, port } = service
         this._host = `${type}://${host}:${port}`
