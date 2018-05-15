@@ -31,6 +31,7 @@ const Room = require('../build/room.js')
 const room = new Room() // Defaults to http://localhost:3000
 
 const facts = process.argv.slice(3)[0]
+const verbose = ['--verbose', '-v'].some(arg => process.argv.indexOf(arg) !== -1);
 
 async function main () {
   switch (process.argv[2]) {
@@ -49,4 +50,10 @@ async function main () {
   }
 }
 
-main().then(process.exit)
+main().catch(err => {
+    let code = err.code || 'Error';
+    console.error(`${code}: ${err.message}`);
+    if (verbose) {
+        console.error(err.stack);
+    }
+}).then(process.exit)
