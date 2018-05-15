@@ -1,12 +1,10 @@
-'use strict'
+'use strict';
 
-function _interopDefault (ex) {
-  return ex && typeof ex === 'object' && 'default' in ex ? ex['default'] : ex
-}
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var fetch = _interopDefault(require('node-fetch'))
-var io = _interopDefault(require('socket.io-client'))
-require('nbonjour')
+var fetch = _interopDefault(require('node-fetch'));
+var io = _interopDefault(require('socket.io-client'));
+require('nbonjour');
 
 function getEnv (key) {
   if (typeof process !== 'undefined') return process.env[key]
@@ -14,17 +12,17 @@ function getEnv (key) {
 
 class Room {
   constructor (host) {
-    this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000'
-    if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
-    this.connect()
+    this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000';
+    if (!this._host.startsWith('http://')) this._host = `http://${this._host}`;
+    this.connect();
   }
 
   connect () {
-    this._socket = io.connect(this._host)
+    this._socket = io.connect(this._host);
     if (typeof window === 'object') {
       this._socket.on('reconnect', () => {
-        window.location.reload(true)
-      })
+        window.location.reload(true);
+      });
     }
   }
 
@@ -33,10 +31,10 @@ class Room {
    * @param {Function} callback
    */
   subscribe (facts, callback) {
-    if (typeof facts === 'string') facts = [facts]
-    const patternsString = JSON.stringify(facts)
-    this._socket.on(patternsString, callback)
-    this._socket.emit('subscribe', patternsString)
+    if (typeof facts === 'string') facts = [facts];
+    const patternsString = JSON.stringify(facts);
+    this._socket.on(patternsString, callback);
+    this._socket.emit('subscribe', patternsString);
   }
 
   /**
@@ -49,7 +47,7 @@ class Room {
       throw new Error('Unknown endpoint, try assert, retract, select, or facts')
     }
 
-    if (typeof facts === 'string') facts = [facts]
+    if (typeof facts === 'string') facts = [facts];
 
     if (!(endpoint === 'facts' || facts.length)) {
       throw new Error('Please pass at least one fact')
@@ -59,17 +57,17 @@ class Room {
     // Does that even make sense?
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
-        this._socket.emit(endpoint, facts, resolve)
+        this._socket.emit(endpoint, facts, resolve);
       })
     }
 
-    const uri = `${this._host}/${endpoint}`
+    const uri = `${this._host}/${endpoint}`;
 
     const post = {
       method: 'POST',
       body: JSON.stringify({ facts }),
       headers: { 'Content-Type': 'application/json' }
-    }
+    };
 
     return fetch(uri, post)
       .then(response => response.json())
@@ -77,8 +75,8 @@ class Room {
         if (error.code === 'ECONNREFUSED') {
           let customError = new Error(
             `No server listening on ${uri}. Try 'npm start' to run a local service.`
-          )
-          customError.code = 'NOTLISTENING'
+          );
+          customError.code = 'NOTLISTENING';
           throw customError
         } else {
           throw error
@@ -103,5 +101,5 @@ class Room {
   }
 }
 
-module.exports = Room
-// # sourceMappingURL=room.js.map
+module.exports = Room;
+//# sourceMappingURL=room.js.map
