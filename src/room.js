@@ -24,10 +24,19 @@ export default class Room {
         const { type, host, port } = service
         this._host = `${type}://${host}:${port}`
         console.log(`set new host to ${this._host}`)
-        this._socket = io.connect(this._host)
+        this.connect()
       })
     }
+    this.connect()
+  }
+
+  connect () {
     this._socket = io.connect(this._host)
+    if (window) {
+      this._socket.on('reconnect', () => {
+        window.location.reload(true)
+      })
+    }
   }
 
   /**
