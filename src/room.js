@@ -55,36 +55,41 @@ export default class Room {
    * @param {String} endpoint assert, retract, select
    * @param {[String]} facts
    */
-  _request(endpoint, facts, callback) {
+  _request(endpoint, facts, method) {
     if (!['assert', 'retract', 'select', 'facts'].includes(endpoint)) {
       throw new Error(
         'Unknown endpoint, try assert, retract, select, or facts'
       );
     }
 
-    if (typeof facts === 'string') facts = [facts];
+    if (typeof facts === 'string') {
+      facts = [facts];
+    }
 
-    if (!(endpoint === 'facts' || facts.length)) {
+    if (!(endpoint === 'facts' || (facts && facts.length))) {
       throw new Error('Please pass at least one fact');
     }
 
-    // Can this return a promise with the result?
-    // Does that even make sense?
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
+        // NOTE - promises only resolve to the first value they ever return
+        // so any additional emit callbacks will be ignored
         this._socket.emit(endpoint, facts, resolve);
       });
     }
 
     const uri = `${this._host}/${endpoint}`;
 
-    const post = {
-      method: 'POST',
-      body: JSON.stringify({ facts }),
+    const opts = {
+      method: method || 'POST',
       headers: { 'Content-Type': 'application/json' }
     };
 
-    return fetch(uri, post)
+    if (facts !== undefined) {
+      opts.body = JSON.stringify({ facts });
+    }
+
+    return fetch(uri, opts)
       .then(response => response.json())
       .catch(error => {
         if (error.code === 'ECONNREFUSED') {
@@ -99,19 +104,19 @@ export default class Room {
       });
   }
 
-  assert(facts, callback) {
-    return this._request('assert', facts, callback);
+  assert(facts) {
+    return this._request('assert', facts);
   }
 
-  retract(facts, callback) {
-    return this._request('retract', facts, callback);
+  retract(facts) {
+    return this._request('retract', facts);
   }
 
-  select(facts, callback) {
-    return this._request('select', facts, callback);
+  select(facts) {
+    return this._request('select', facts);
   }
 
   facts() {
-    return this._request('facts');
+    return this._request('facts', undefined, 'GET');
   }
 }
