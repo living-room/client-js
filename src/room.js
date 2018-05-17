@@ -63,6 +63,23 @@ export default class Room {
     this._socket.emit('subscribe', patternsString)
   }
 
+  on (...facts) {
+    const callback = facts.splice(facts.length - 1)[0]
+    const cb = ({ assertions }) => {
+      assertions.forEach(assertion => {
+        for (let key in assertion) {
+          assertion[key] =
+            assertion[key].value ||
+            assertion[key].word ||
+            assertion[key].text ||
+            assertion[key].id
+        }
+        callback(assertion)
+      })
+    }
+    this.subscribe(facts, cb)
+  }
+
   /**
    *
    * @param {String} endpoint assert, retract, select
