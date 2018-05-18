@@ -80,10 +80,7 @@ class Room {
   }
 
   on (...facts) {
-    console.log('---');
-    console.dir(facts);
     const callback = facts.splice(facts.length - 1)[0];
-    console.dir(facts);
     const cb = ({ assertions }) => {
       assertions.forEach(callback);
     };
