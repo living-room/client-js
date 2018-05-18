@@ -283,7 +283,7 @@ var LivingRoom = (function (fetch,io,bonjour) {
                 const patternsString = JSON.stringify(facts);
                 // TODO: figure out why we even get undefined here
                 const isDefined = v => typeof v !== 'undefined';
-                const cb = ({assertions, retractions}) => {
+                const cb = ({ assertions, retractions }) => {
                   callback({
                     assertions: assertions.map(this._unwrap).filter(isDefined),
                     retractions: retractions.map(this._unwrap).filter(isDefined)
@@ -298,11 +298,7 @@ var LivingRoom = (function (fetch,io,bonjour) {
                 for (let key in fact) {
                   const val = fact[key];
                   if (typeof val === 'undefined') continue
-                  unwrapped[key] =
-                    val.value ||
-                    val.word ||
-                    val.text ||
-                    val.id;
+                  unwrapped[key] = val.value || val.word || val.text || val.id;
                 }
                 if (Object.keys(unwrapped).length === 0) return
                 return unwrapped
@@ -325,7 +321,7 @@ var LivingRoom = (function (fetch,io,bonjour) {
                * @param {String} endpoint assert, retract, select
                * @param {[String]} facts
                */
-              _request(endpoint, facts, method) {
+              _request (endpoint, facts, method) {
                 if (!['assert', 'retract', 'select', 'facts'].includes(endpoint)) {
                   throw new Error('Unknown endpoint, try assert, retract, select, or facts')
                 }
@@ -335,7 +331,7 @@ var LivingRoom = (function (fetch,io,bonjour) {
                 }
 
                 if (!(endpoint === 'facts' || (facts && facts.length))) {
-                  throw new Error('Please pass at least one fact');
+                  throw new Error('Please pass at least one fact')
                 }
 
                 if (this._socket.connected) {
@@ -343,7 +339,7 @@ var LivingRoom = (function (fetch,io,bonjour) {
                     // NOTE - promises only resolve to the first value they ever return
                     // so any additional emit callbacks will be ignored
                     this._socket.emit(endpoint, facts, resolve);
-                  });
+                  })
                 }
 
                 const uri = `${this._host}/${endpoint}`;
@@ -372,20 +368,20 @@ var LivingRoom = (function (fetch,io,bonjour) {
                   })
               }
 
-              assert(facts) {
-                return this._request('assert', facts);
+              assert (facts) {
+                return this._request('assert', facts)
               }
 
-              retract(facts) {
-                return this._request('retract', facts);
+              retract (facts) {
+                return this._request('retract', facts)
               }
 
-              select(facts) {
-                return this._request('select', facts);
+              select (facts) {
+                return this._request('select', facts)
               }
 
-              facts() {
-                return this._request('facts', undefined, 'GET');
+              facts () {
+                return this._request('facts', undefined, 'GET')
               }
             }
 
