@@ -53,31 +53,45 @@ export default class Room {
   }
 
   /**
-   * @param {String | String[]} facts
+   * @param {String} ...facts
    * @param {Function} callback
    */
-  subscribe (facts, callback) {
-    if (typeof facts === 'string') facts = [facts]
+  subscribe (...facts) {
+    const callback = facts.splice(facts.length - 1)[0]
     const patternsString = JSON.stringify(facts)
-    this._socket.on(patternsString, callback)
+    // TODO: figure out why we even get undefined here
+    const isDefined = v => typeof v !== 'undefined'
+    const cb = ({ assertions, retractions }) => {
+      callback({
+        assertions: assertions.map(this._unwrap).filter(isDefined),
+        retractions: retractions.map(this._unwrap).filter(isDefined)
+      })
+    }
+    this._socket.on(patternsString, cb)
     this._socket.emit('subscribe', patternsString)
   }
 
-  on (...facts) {
-    const callback = facts.splice(facts.length - 1)[0]
-    const cb = ({ assertions }) => {
-      assertions.forEach(assertion => {
-        for (let key in assertion) {
-          assertion[key] =
-            assertion[key].value ||
-            assertion[key].word ||
-            assertion[key].text ||
-            assertion[key].id
-        }
-        callback(assertion)
-      })
+  _unwrap (fact) {
+    const unwrapped = {}
+    for (let key in fact) {
+      const val = fact[key]
+      if (typeof val === 'undefined') continue
+      unwrapped[key] = val.value || val.word || val.text || val.id
     }
-    this.subscribe(facts, cb)
+    if (Object.keys(unwrapped).length === 0) return
+    return unwrapped
+  }
+
+  on (...facts) {
+    console.log('---')
+    console.dir(facts)
+    const callback = facts.splice(facts.length - 1)[0]
+    console.dir(facts)
+    const cb = ({ assertions }) => {
+      assertions.forEach(callback)
+    }
+    console.dir(cb)
+    this.subscribe(...facts, cb)
   }
 
   /**
@@ -85,25 +99,25 @@ export default class Room {
    * @param {String} endpoint assert, retract, select
    * @param {[String]} facts
    */
-  _request(endpoint, facts, method) {
+  _request (endpoint, facts, method) {
     if (!['assert', 'retract', 'select', 'facts'].includes(endpoint)) {
       throw new Error('Unknown endpoint, try assert, retract, select, or facts')
     }
 
     if (typeof facts === 'string') {
-      facts = [facts];
+      facts = [facts]
     }
 
     if (!(endpoint === 'facts' || (facts && facts.length))) {
-      throw new Error('Please pass at least one fact');
+      throw new Error('Please pass at least one fact')
     }
 
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
         // NOTE - promises only resolve to the first value they ever return
         // so any additional emit callbacks will be ignored
-        this._socket.emit(endpoint, facts, resolve);
-      });
+        this._socket.emit(endpoint, facts, resolve)
+      })
     }
 
     const uri = `${this._host}/${endpoint}`
@@ -114,7 +128,7 @@ export default class Room {
     }
 
     if (facts !== undefined) {
-      opts.body = JSON.stringify({ facts });
+      opts.body = JSON.stringify({ facts })
     }
 
     return fetch(uri, opts)
@@ -132,19 +146,19 @@ export default class Room {
       })
   }
 
-  assert(facts) {
-    return this._request('assert', facts);
+  assert (facts) {
+    return this._request('assert', facts)
   }
 
-  retract(facts) {
-    return this._request('retract', facts);
+  retract (facts) {
+    return this._request('retract', facts)
   }
 
-  select(facts) {
-    return this._request('select', facts);
+  select (facts) {
+    return this._request('select', facts)
   }
 
-  facts() {
-    return this._request('facts', undefined, 'GET');
+  facts () {
+    return this._request('facts', undefined, 'GET')
   }
 }
