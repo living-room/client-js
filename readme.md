@@ -52,8 +52,6 @@ node examples/sensor.js
 
 You should see some animals being printed out
 
-![example-sensor-image][]
-
 ## Connect the sensor
 
 This fake sensor is for debugging purposes - in lovelace we have a few sensors that [detect and track color][color-sensor], and [share the locations of objects in the room][yolo-sensor].
