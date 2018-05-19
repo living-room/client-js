@@ -42,13 +42,18 @@ async function main () {
     case 'retract':
       return room.retract(facts).then(console.log)
     case 'select':
-      return room
-        .select(facts)
-        .then(({ assertions }) => console.log(assertions))
+      return room.select(facts).then(({assertions}) => console.dir(assertions))
     case 'subscribe':
-      room.subscribe(facts, console.log)
-      process.stdin.on('data', () => process.exit())
-      break
+      return new Promise(resolve => {
+        let delay = 100
+        const logWithDelayOnce = a => setTimeout(() => console.log(a), (delay = 0))
+        room.subscribe(facts, logWithDelayOnce)
+        .then(() => {
+          console.error(`subscribed to "${facts}"`)
+          console.error(`press any key to quit`)
+        })
+        process.stdin.on('data', resolve)
+      })
     default:
       return printHelp()
   }

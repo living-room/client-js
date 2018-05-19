@@ -1,5 +1,3 @@
-'use strict'
-
 /**
  * Creates a new http client to a roomdb instance
  *
@@ -26,8 +24,6 @@ export default class Room {
         const uri = `${type}://${host}:${port}`
         if (this._hosts.has(uri)) return
         this._hosts.add(uri)
-        console.log(`found new host ${uri}`)
-        console.log(`use \`room.nexthost()\` to cycle through hosts`)
       })
     }
     this.connect()
@@ -43,8 +39,11 @@ export default class Room {
   }
 
   connect () {
-    this._socket = io.connect(this._host)
-    console.log(`connecting to ${this._host}`)
+    this._socket = io(this._host)
+    this._socket.on('connect', () => {
+      if (!this._socket.connected) return
+      console.error(`connected to ${this._socket.io.uri}`)
+    })
     if (typeof window === 'object') {
       this._socket.on('reconnect', () => {
         window.location.reload(true)
@@ -68,7 +67,9 @@ export default class Room {
       })
     }
     this._socket.on(patternsString, cb)
-    this._socket.emit('subscribe', patternsString)
+    return new Promise((resolve, reject) => {
+      this._socket.emit('subscribe', patternsString, resolve)
+    })
   }
 
   _unwrap (fact) {
@@ -111,8 +112,6 @@ export default class Room {
 
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
-        // NOTE - promises only resolve to the first value they ever return
-        // so any additional emit callbacks will be ignored
         this._socket.emit(endpoint, facts, resolve)
       })
     }
