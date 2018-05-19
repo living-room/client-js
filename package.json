@@ -20,7 +20,7 @@
     "retract": "node examples/commandline.js retract",
     "select": "node examples/commandline.js select",
     "subscribe": "node examples/commandline.js subscribe",
-    "prepublish": "npm-run-all -s format build test"
+    "prepare": "npm-run-all -s format build test"
   },
   "dependencies": {
     "ava": "^1.0.0-beta.4",
