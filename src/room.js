@@ -88,7 +88,6 @@ export default class Room {
     const cb = ({ assertions }) => {
       assertions.forEach(callback)
     }
-    console.dir(cb)
     this.subscribe(...facts, cb)
   }
 
