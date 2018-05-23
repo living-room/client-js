@@ -104,7 +104,7 @@ export default class Room {
    */
   _request (facts, endpoint = 'messages', method = 'POST') {
     facts = facts || this._messages
-    if (endpoint !== 'facts' && ! facts.length) {
+    if (endpoint !== 'facts' && !facts.length) {
       throw new Error(`Please pass at least one fact for ${endpoint}`)
     }
 
@@ -129,7 +129,7 @@ export default class Room {
 
     return fetch(uri, opts)
       .then(response => response.json())
-      .then(() => this._messages = [])
+      .then(() => (this._messages = []))
       .catch(error => {
         if (error.code === 'ECONNREFUSED') {
           let customError = new Error(
