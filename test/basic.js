@@ -1,21 +1,16 @@
-const Room = require(`./room`)
+const Room = require(`../build/room`)
 const test = require(`ava`)
-const getPort = require(`get-port`)
-const server = require(`@living-room/service-js`)
 
 test.beforeEach(async t => {
-  const port = await getPort()
-  t.context.server = server.create('socketio').listen(port)
-  t.context.room = Room.create(`http://localhost:${port}`)
-})
-
-test.afterEach(t => {
-  t.context.server.close()
+  const server = require(`@living-room/service-js`)
+  t.context.server = await server.listen()
+  const port = t.context.server.port
+  t.context.room = new Room(`http://localhost:${port}`)
 })
 
 test.cb(`we get calls when broken up`, t => {
   const room = t.context.room
-  const asserts = new Set([
+  const animal = new Set([
     `party`,
     `car`,
     `animal`,
@@ -23,9 +18,12 @@ test.cb(`we get calls when broken up`, t => {
     `me`
   ])
 
+  const asserts = Array.from(animal.values())
+    .map(what => ({ assert: `animal ${what}` }))
+
   room.on(`animal $what`, ({what}) => {
-    t.true(asserts.delete(what))
-    if (asserts.size === 0) t.end()
+    t.true(animal.delete(what))
+    if (animal.size === 0) t.end()
   })
 
   room
@@ -33,11 +31,14 @@ test.cb(`we get calls when broken up`, t => {
      .assert(`animal car`)
      .assert(`animal animal`)
 
-   room
+  room
      .assert(`animal blue`)
      .assert(`animal me`)
+     .then(({facts}) => {
+       t.deepEqual(facts, asserts)
+     })
 })
-
+/*
 test.cb(`once only gets called for existing assertions`, t => {
   const room = t.context.room
   const asserts = new Set([ `first`, `second` ])
@@ -46,7 +47,7 @@ test.cb(`once only gets called for existing assertions`, t => {
     .assert(`second`)
     .then(() => {
       room
-        .once(`$number`, ({number}) => {
+        .on(`$number`, ({number}) => {
           t.true([`first`, `second`].includes(number))
         })
       setTimeout(() => {
@@ -57,7 +58,6 @@ test.cb(`once only gets called for existing assertions`, t => {
 
 test(`await works`, async t => {
   const room = t.context.room
-
   const { facts } = await room.assert(`hello`)
   t.deepEqual(facts, [{assert: `hello`}])
 })
@@ -86,7 +86,7 @@ test.cb(`on gets called for all assertions`, t => {
 
 test.cb(`an assert with no callback works`, t => {
   const room = t.context.room
-  room.once(`$what callback assert`, ({what}) => {
+  room.on(`$what callback assert`, ({what}) => {
     t.is(what, `no`)
     t.end()
   })
@@ -117,4 +117,5 @@ test.cb('setImmediate clears calls a second time', t => {
         t.end()
       })
   })
-
+})
+*/

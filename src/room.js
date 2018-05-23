@@ -6,6 +6,7 @@
 import fetch from 'node-fetch'
 import io from 'socket.io-client'
 import bonjour from 'nbonjour'
+import EventEmitter from 'events'
 
 function getEnv (key) {
   if (typeof process !== 'undefined') return process.env[key]
@@ -13,6 +14,7 @@ function getEnv (key) {
 
 export default class Room {
   constructor (host) {
+    this._messages = []
     this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
     this._hosts = new Set(this._host)
@@ -27,6 +29,11 @@ export default class Room {
       })
     }
     this.connect()
+  }
+
+  then (onResolve, onReject) {
+    clearImmediate(this._immediate)
+    return this._request().then(onResolve, onReject)
   }
 
   nexthost () {
@@ -58,12 +65,10 @@ export default class Room {
   subscribe (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
     const patternsString = JSON.stringify(facts)
-    // TODO: figure out why we even get undefined here
-    const isDefined = v => typeof v !== 'undefined'
     const cb = ({ assertions, retractions }) => {
       callback({
-        assertions: assertions.map(this._unwrap).filter(isDefined),
-        retractions: retractions.map(this._unwrap).filter(isDefined)
+        assertions: assertions.map(this._unwrap),
+        retractions: retractions.map(this._unwrap)
       })
     }
     this._socket.on(patternsString, cb)
@@ -93,20 +98,19 @@ export default class Room {
 
   /**
    *
-   * @param {String} endpoint assert, retract, select
-   * @param {[String]} facts
+   * @param {[String]} facts array of messages to send
+   * @param {String: messages | facts | select } endpoint
+   * @param {String: GET | POST} method http method to use
    */
-  _request (endpoint, facts, method) {
-    if (!['assert', 'retract', 'select', 'facts'].includes(endpoint)) {
-      throw new Error('Unknown endpoint, try assert, retract, select, or facts')
-    }
-
-    if (typeof facts === 'string') {
-      facts = [facts]
-    }
-
-    if (!(endpoint === 'facts' || (facts && facts.length))) {
-      throw new Error('Please pass at least one fact')
+  _request (facts = this._messages, endpoint = '/messages', method = 'POST') {
+    if (
+      !(
+        endpoint === 'facts' ||
+        (facts && facts.length) ||
+        this._messages.length
+      )
+    ) {
+      throw new Error(`Please pass at least one fact for ${endpoint}`)
     }
 
     if (this._socket.connected) {
@@ -118,12 +122,9 @@ export default class Room {
     const uri = `${this._host}/${endpoint}`
 
     const opts = {
-      method: method || 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    }
-
-    if (facts !== undefined) {
-      opts.body = JSON.stringify({ facts })
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ facts })
     }
 
     return fetch(uri, opts)
@@ -141,16 +142,33 @@ export default class Room {
       })
   }
 
-  assert (facts) {
-    return this._request('assert', facts)
+  _enqueue (facts) {
+    clearImmediate(this._immediate)
+    this._messages.push(...facts)
+    setImmediate(this._request.bind(this))
+    return this
   }
 
-  retract (facts) {
-    return this._request('retract', facts)
+  assert (...facts) {
+    return this._enqueue(facts.map(assert => ({ assert })))
+  }
+
+  retract (...facts) {
+    return this._enqueue(facts.map(retract => ({ retract })))
   }
 
   select (facts) {
-    return this._request('select', facts)
+    return this._request(facts, 'select').then(({ assertions }) =>
+      assertions.map(this._unwrap)
+    )
+  }
+
+  count (facts) {
+    return this._request(facts, 'select').then(assertions => assertions.length)
+  }
+
+  exists (facts) {
+    return this.count(facts).then(count => count > 0)
   }
 
   facts () {

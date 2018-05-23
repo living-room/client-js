@@ -10,16 +10,21 @@
   "repository": "https://github.com/living-room/client-js",
   "author": "Jonathan Dahan",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "@living-room/service-js": "^0.5.8"
+  },
   "scripts": {
     "format": "prettier-standard src/room.js",
     "build": "rollup -c",
+    "build:watch": "rollup -c -w",
     "test": "ava",
+    "test:watch": "ava -w",
     "examples": "serve --cors examples",
     "assert": "node examples/commandline.js assert",
     "retract": "node examples/commandline.js retract",
     "select": "node examples/commandline.js select",
     "subscribe": "node examples/commandline.js subscribe",
+    "dev": "npm-run-all -p build:watch test:watch",
     "prepare": "npm-run-all -s format build test"
   },
   "dependencies": {
