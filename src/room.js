@@ -62,6 +62,25 @@ export default class Room {
    * @param {String} ...facts
    * @param {Function} callback
    */
+  unsubscribe (...facts) {
+    const callback = facts.splice(facts.length - 1)[0]
+    const patternsString = JSON.stringify(facts)
+    const cb = ({ assertions, retractions }) => {
+      callback({
+        assertions: assertions.map(this._unwrap),
+        retractions: retractions.map(this._unwrap)
+      })
+    }
+    this._socket.off(patternsString, cb)
+    return new Promise((resolve, reject) => {
+      this._socket.emit('unsubscribe', patternsString, resolve)
+    })
+  }
+
+  /**
+   * @param {String} ...facts
+   * @param {Function} callback
+   */
   subscribe (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
     const patternsString = JSON.stringify(facts)
@@ -96,6 +115,14 @@ export default class Room {
     this.subscribe(...facts, cb)
   }
 
+  off (...facts) {
+    const callback = facts.splice(facts.length - 1)[0]
+    const cb = ({ assertions }) => {
+      assertions.forEach(callback)
+    }
+    this.unsubscribe(...facts)
+  }
+
   /**
    *
    * @param {[String]} facts array of messages to send
@@ -110,9 +137,9 @@ export default class Room {
 
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
-        const cb = () => {
+        const cb = (facts) => {
           this._messages = []
-          resolve()
+          resolve(facts)
         }
 
         this._socket.emit(endpoint, facts, cb)
@@ -128,8 +155,10 @@ export default class Room {
     }
 
     return fetch(uri, opts)
-      .then(response => response.json())
-      .then(() => (this._messages = []))
+      .then(response => {
+        this._messages = []
+        return response.json()
+      })
       .catch(error => {
         if (error.code === 'ECONNREFUSED') {
           let customError = new Error(
