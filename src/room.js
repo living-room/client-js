@@ -17,7 +17,7 @@ export default class Room {
     this._messages = []
     this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
-    this._hosts = new Set(this._host)
+    this._hosts = new Set([this._host])
 
     if (bonjour) {
       const serviceDefinition = { type: 'http', subtypes: ['livingroom'] }
@@ -102,20 +102,20 @@ export default class Room {
    * @param {String: messages | facts | select } endpoint
    * @param {String: GET | POST} method http method to use
    */
-  _request (facts = this._messages, endpoint = '/messages', method = 'POST') {
-    if (
-      !(
-        endpoint === 'facts' ||
-        (facts && facts.length) ||
-        this._messages.length
-      )
-    ) {
+  _request (facts, endpoint = 'messages', method = 'POST') {
+    facts = facts || this._messages
+    if (endpoint !== 'facts' && ! facts.length) {
       throw new Error(`Please pass at least one fact for ${endpoint}`)
     }
 
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
-        this._socket.emit(endpoint, facts, resolve)
+        const cb = () => {
+          this._messages = []
+          resolve()
+        }
+
+        this._socket.emit(endpoint, facts, cb)
       })
     }
 
@@ -129,6 +129,7 @@ export default class Room {
 
     return fetch(uri, opts)
       .then(response => response.json())
+      .then(() => this._messages = [])
       .catch(error => {
         if (error.code === 'ECONNREFUSED') {
           let customError = new Error(
