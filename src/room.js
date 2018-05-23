@@ -137,7 +137,7 @@ export default class Room {
 
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
-        const cb = (facts) => {
+        const cb = facts => {
           this._messages = []
           resolve(facts)
         }
