@@ -64,11 +64,11 @@ export default class Room {
    */
   unsubscribe (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
-    const patternsString = JSON.stringify(facts)
+    const patternsString = JSON.stringify(...facts)
     const cb = ({ assertions, retractions }) => {
       callback({
-        assertions: assertions.map(this._unwrap),
-        retractions: retractions.map(this._unwrap)
+        assertions: assertions.map(this._unwrap) || [],
+        retractions: retractions.map(this._unwrap) | []
       })
     }
     this._socket.off(patternsString, cb)
@@ -83,11 +83,11 @@ export default class Room {
    */
   subscribe (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
-    const patternsString = JSON.stringify(facts)
+    const patternsString = JSON.stringify(...facts)
     const cb = ({ assertions, retractions }) => {
       callback({
-        assertions: assertions.map(this._unwrap),
-        retractions: retractions.map(this._unwrap)
+        assertions: assertions.map(this._unwrap) || [],
+        retractions: retractions.map(this._unwrap) || []
       })
     }
     this._socket.on(patternsString, cb)
@@ -137,9 +137,9 @@ export default class Room {
 
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
-        const cb = facts => {
+        const cb = result => {
           this._messages = []
-          resolve(facts)
+          resolve(result)
         }
 
         this._socket.emit(endpoint, facts, cb)
@@ -187,10 +187,8 @@ export default class Room {
     return this._enqueue(facts.map(retract => ({ retract })))
   }
 
-  select (facts) {
-    return this._request(facts, 'select').then(({ assertions }) =>
-      assertions.map(this._unwrap)
-    )
+  select (...facts) {
+    return this._request(facts, 'select')
   }
 
   count (facts) {

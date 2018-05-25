@@ -16,6 +16,19 @@ test(`await assert`, async t => {
   const { room } = t.context
   const { facts } = await room.assert(`hello`)
   t.deepEqual(facts, [{assert: `hello`}])
+  const result = await room.select(`$word`)
+  t.deepEqual(result, [{
+    word: { word: `hello` }
+  }])
+})
+
+test.cb(`no callback subscribe`, t => {
+  const { room } = t.context
+  room.subscribe(`$what callback assert`, result => {
+    t.end()
+  })
+
+  room.assert(`no callback assert`)
 })
 
 test.cb(`no callback assert`, t => {
@@ -25,9 +38,7 @@ test.cb(`no callback assert`, t => {
     t.end()
   })
 
-  setImmediate(() => {
-    room.assert(`no callback assert`)
-  })
+  room.assert(`no callback assert`)
 })
 
 test.cb(`multiple asserts`, t => {
@@ -136,7 +147,6 @@ test.cb('setImmediate clears calls a second time', t => {
     .assert('coolest')
     .then(response=> {
       t.is(response, {facts: [{assert: `like`}, {assert: `the`}, {assert: `coolest`}]})
-      console.dir(response)
       t.end()
     })
 })
