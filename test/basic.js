@@ -24,7 +24,9 @@ test(`await assert`, async t => {
 
 test.cb(`no callback subscribe`, t => {
   const { room } = t.context
-  room.subscribe(`$what callback assert`, result => {
+  room.subscribe(`$what callback assert`, ({assertions, retractions}) => {
+    t.deepEqual(assertions, [{what: `no`}])
+    t.deepEqual(retractions, [])
     t.end()
   })
 

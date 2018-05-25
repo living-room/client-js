@@ -7,6 +7,7 @@ import fetch from 'node-fetch'
 import io from 'socket.io-client'
 import bonjour from 'nbonjour'
 import EventEmitter from 'events'
+import util from 'util'
 
 function getEnv (key) {
   if (typeof process !== 'undefined') return process.env[key]
@@ -32,7 +33,7 @@ export default class Room {
   }
 
   then (onResolve, onReject) {
-    clearImmediate(this._immediate)
+    clearTimeout(this._timeout)
     return this._request().then(onResolve, onReject)
   }
 
@@ -64,11 +65,12 @@ export default class Room {
    */
   unsubscribe (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
-    const patternsString = JSON.stringify(...facts)
+    const patternsString = JSON.stringify(facts)
     const cb = ({ assertions, retractions }) => {
+      // FIXME: figure out why we have to filter for undefined...
       callback({
-        assertions: assertions.map(this._unwrap) || [],
-        retractions: retractions.map(this._unwrap) | []
+        assertions: assertions.map(this._unwrap).filter(a => a) || [],
+        retractions: retractions.map(this._unwrap).filter(r => r) | []
       })
     }
     this._socket.off(patternsString, cb)
@@ -83,16 +85,19 @@ export default class Room {
    */
   subscribe (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
-    const patternsString = JSON.stringify(...facts)
     const cb = ({ assertions, retractions }) => {
+      // FIXME: figure out why we have to filter for undefined...
+      // something is calling with an assertions of... [ {} ]
       callback({
-        assertions: assertions.map(this._unwrap) || [],
-        retractions: retractions.map(this._unwrap) || []
+        assertions: assertions.map(this._unwrap).filter(a => a) || [],
+        retractions: retractions.map(this._unwrap).filter(r => r) || []
       })
     }
-    this._socket.on(patternsString, cb)
+
     return new Promise((resolve, reject) => {
-      this._socket.emit('subscribe', patternsString, resolve)
+      this._socket.emit('subscribe', facts, resolve)
+      // FIXME: do not socket.on() if resolve is not called?
+      this._socket.on(JSON.stringify(facts), cb)
     })
   }
 
@@ -120,7 +125,7 @@ export default class Room {
     const cb = ({ assertions }) => {
       assertions.forEach(callback)
     }
-    this.unsubscribe(...facts)
+    this.unsubscribe(...facts, cb)
   }
 
   /**
@@ -173,9 +178,9 @@ export default class Room {
   }
 
   _enqueue (facts) {
-    clearImmediate(this._immediate)
+    clearTimeout(this._timeout)
     this._messages.push(...facts)
-    setImmediate(this._request.bind(this))
+    setTimeout(this._request.bind(this))
     return this
   }
 
