@@ -1,6 +1,6 @@
 {
   "name": "@living-room/client-js",
-  "version": "0.5.6",
+  "version": "0.6.2",
   "description": "commandline, node.js, and browser client for living room server",
   "main": "build/room.js",
   "browser": "build/room.browser.js",
@@ -11,7 +11,7 @@
   "author": "Jonathan Dahan",
   "license": "MIT",
   "devDependencies": {
-    "@living-room/service-js": "^0.6.0"
+    "@living-room/service-js": "^0.6.2"
   },
   "scripts": {
     "format": "prettier-standard src/room.js",
