@@ -182,7 +182,9 @@ export default class Room {
   }
 
   send (...facts) {
-    return new Promise((resolve, reject) => this._enqueue(facts).then(resolve, reject))
+    return new Promise((resolve, reject) =>
+      this._enqueue(facts).then(resolve, reject)
+    )
   }
 
   assert (...facts) {
