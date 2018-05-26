@@ -30,7 +30,7 @@ test.cb(`no callback subscribe`, t => {
     t.end()
   })
 
-  room.assert(`no callback assert`)
+  room.assert(`no callback assert`).then()
 })
 
 test.cb(`no callback assert`, t => {
@@ -40,7 +40,7 @@ test.cb(`no callback assert`, t => {
     t.end()
   })
 
-  room.assert(`no callback assert`)
+  room.assert(`no callback assert`).then()
 })
 
 test.cb(`multiple asserts`, t => {
@@ -68,7 +68,7 @@ test.cb(`multiple asserts`, t => {
 
   room
      .assert(`animal blue`)
-     .assert(`animal me`)
+     .assert(`animal me`).then()
 })
 
 /*

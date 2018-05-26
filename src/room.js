@@ -33,7 +33,6 @@ export default class Room {
   }
 
   then (onResolve, onReject) {
-    clearTimeout(this._timeout)
     return this._request().then(onResolve, onReject)
   }
 
@@ -178,10 +177,12 @@ export default class Room {
   }
 
   _enqueue (facts) {
-    clearTimeout(this._timeout)
     this._messages.push(...facts)
-    setTimeout(this._request.bind(this))
     return this
+  }
+
+  send (...facts) {
+    return new Promise((resolve, reject) => this._enqueue(facts).then(resolve, reject))
   }
 
   assert (...facts) {
