@@ -4,6 +4,30 @@ A javascript package that makes it easy to talk with a [living room server](http
 
 It works in node or the browser, and looks for a server at `LIVING_ROOM_HOST` (default `localhost:3000`).
 
+There are two ways to use it
+
+## fluent
+
+```js
+room
+  .assert()
+  .retract()
+  .assert()
+  .then() // don't forget this or it won't fire!
+```
+
+## batched
+
+```js
+room.send(
+  {assert: 'thing to assert'},
+  {retract: 'thing to retract'},
+  {assert: 'thing to assert'}
+)
+```
+
+We are open to other experimentation, check the [issue tracker](https://github.com/living-room/client-js/issues) for more discussion
+
 # getting started
 
 First install this codebase
