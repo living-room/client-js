@@ -49,7 +49,7 @@ export default class Room {
     this._socket = io(this._host)
     this._socket.on('connect', () => {
       if (!this._socket.connected) return
-      console.error(`connected to ${this._socket.io.uri}`)
+      console.log(`connected to ${this._socket.io.uri}`)
     })
     if (typeof window === 'object') {
       this._socket.on('reconnect', () => {
