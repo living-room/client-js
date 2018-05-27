@@ -32,7 +32,12 @@ export default class Room {
     this.connect()
   }
 
+  reset () {
+    clearTimeout(this._timeout)
+  }
+
   then (onResolve, onReject) {
+    this.reset()
     return this._request().then(onResolve, onReject)
   }
 
@@ -177,7 +182,9 @@ export default class Room {
   }
 
   _enqueue (facts) {
+    this.reset()
     this._messages.push(...facts)
+    this._timeout = setTimeout(this.then.bind(this))
     return this
   }
 
