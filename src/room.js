@@ -52,10 +52,6 @@ export default class Room {
 
   connect () {
     this._socket = io(this._host)
-    this._socket.on('connect', () => {
-      if (!this._socket.connected) return
-      console.log(`connected to ${this._socket.io.uri}`)
-    })
     if (typeof window === 'object') {
       this._socket.on('reconnect', () => {
         window.location.reload(true)
@@ -147,7 +143,10 @@ export default class Room {
     if (this._socket.connected) {
       return new Promise((resolve, reject) => {
         const cb = result => {
-          this._messages = []
+          const mapped = result.map(JSON.stringify)
+          this._messages = this._messages.filter(
+            message => !mapped.includes(JSON.stringify(message))
+          )
           resolve(result)
         }
 
@@ -164,9 +163,15 @@ export default class Room {
     }
 
     return fetch(uri, opts)
+      .then(response => response.json())
       .then(response => {
-        this._messages = []
-        return response.json()
+        if (response) {
+          const mapped = response.facts.map(JSON.stringify)
+          this._messages = this._messages.filter(
+            message => !mapped.includes(JSON.stringify(message))
+          )
+        }
+        return response
       })
       .catch(error => {
         if (error.code === 'ECONNREFUSED') {
