@@ -6,8 +6,6 @@
 import fetch from 'node-fetch'
 import io from 'socket.io-client'
 import bonjour from 'nbonjour'
-import EventEmitter from 'events'
-import util from 'util'
 
 function getEnv (key) {
   if (typeof process !== 'undefined') return process.env[key]
@@ -19,6 +17,7 @@ export default class Room {
     this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
     this._hosts = new Set([this._host])
+    this.connect()
 
     if (bonjour) {
       const serviceDefinition = { type: 'http', subtypes: ['livingroom'] }
@@ -29,7 +28,6 @@ export default class Room {
         this._hosts.add(uri)
       })
     }
-    this.connect()
   }
 
   reset () {
@@ -66,14 +64,15 @@ export default class Room {
   unsubscribe (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
     const patternsString = JSON.stringify(facts)
-    const cb = ({ assertions, retractions }) => {
-      // FIXME: figure out why we have to filter for undefined...
-      callback({
-        assertions: assertions.map(this._unwrap).filter(a => a) || [],
-        retractions: retractions.map(this._unwrap).filter(r => r) | []
-      })
+
+    const unwrapped = results => {
+      console.log(`in unwrapped`)
+      const unwrappedResults = this._unwrap(results)
+      console.log(unwrappedResults)
+      callback(unwrappedResults)
     }
-    this._socket.off(patternsString, cb)
+    this._socket.off(patternsString, unwrapped)
+
     return new Promise((resolve, reject) => {
       this._socket.emit('unsubscribe', patternsString, resolve)
     })
@@ -84,47 +83,56 @@ export default class Room {
    * @param {Function} callback
    */
   subscribe (...facts) {
-    const callback = facts.splice(facts.length - 1)[0]
-    const cb = ({ assertions, retractions }) => {
-      // FIXME: figure out why we have to filter for undefined...
-      // something is calling with an assertions of... [ {} ]
-      callback({
-        assertions: assertions.map(this._unwrap).filter(a => a) || [],
-        retractions: retractions.map(this._unwrap).filter(r => r) || []
-      })
-    }
-
     return new Promise((resolve, reject) => {
-      this._socket.emit('subscribe', facts, resolve)
-      // FIXME: do not socket.on() if resolve is not called?
-      this._socket.on(JSON.stringify(facts), cb)
+      const callback = facts.splice(facts.length - 1)[0]
+      const subscription = JSON.stringify(facts)
+
+      const subscribed = data => {
+        clearTimeout(timeout)
+        resolve()
+      }
+
+      const unwrapped = results => {
+        const unwrappedResults = this._unwrap(results)
+        callback(unwrappedResults)
+      }
+
+      const timeout = setTimeout(() => {
+        this._socket.off(subscription, unwrapped)
+        return reject(new Error('subscribe timed out after 1500ms'))
+      }, 1500)
+
+      this._socket.on(subscription, unwrapped)
+      this._socket.emit('subscribe', facts, subscribed)
     })
   }
 
-  _unwrap (fact) {
-    const unwrapped = {}
-    for (let key in fact) {
-      const val = fact[key]
-      if (typeof val === 'undefined') continue
-      unwrapped[key] = val.value || val.word || val.text || val.id
+  _unwrap ({assertions, retractions}) {
+    const unwrap = fact => {
+      const unwrapped = {}
+      for (let key in fact) {
+        const val = fact[key]
+        if (typeof val === 'undefined') continue
+        unwrapped[key] = val.value || val.word || val.text || val.id
+      }
+      return unwrapped
     }
-    if (Object.keys(unwrapped).length === 0) return
-    return unwrapped
+
+    return {
+      assertions: assertions.map(unwrap),
+      retractions: retractions.map(unwrap)
+    }
   }
 
   on (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
-    const cb = ({ assertions }) => {
-      assertions.forEach(callback)
-    }
+    const cb = ({ assertions }) => assertions.forEach(callback)
     this.subscribe(...facts, cb)
   }
 
   off (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
-    const cb = ({ assertions }) => {
-      assertions.forEach(callback)
-    }
+    const cb = ({ assertions }) => assertions.forEach(callback)
     this.unsubscribe(...facts, cb)
   }
 

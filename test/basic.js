@@ -31,11 +31,12 @@ test(`no callback subscribe`, async t => {
   room.assert(`no callback assert`)
 
   return new Promise((resolve, reject) => {
-    room.subscribe(`$what callback assert`, ({assertions, retractions}) => {
-      t.deepEqual(assertions, [{what: `no`}])
-      t.deepEqual(retractions, [])
-      resolve()
-    })
+    room
+      .subscribe(`$what callback assert`, ({assertions, retractions}) => {
+        t.deepEqual(assertions, [{what: `no`}])
+        t.deepEqual(retractions, [])
+        resolve()
+      })
   })
 })
 
@@ -63,9 +64,6 @@ test(`multiple asserts`, t => {
     `me`
   ])
 
-  const asserts = Array.from(animal.values())
-    .map(what => ({ assert: `animal ${what}` }))
-
   return new Promise((resolve, reject) => {
     room.on(`animal $what`, ({what}) => {
       t.true(animal.delete(what))
@@ -73,19 +71,18 @@ test(`multiple asserts`, t => {
     })
 
     room
-       .assert(`animal party`)
-       .assert(`animal car`)
-       .assert(`animal animal`)
+      .assert(`animal party`)
+      .assert(`animal car`)
+      .assert(`animal animal`)
 
     room
-       .assert(`animal blue`)
-       .assert(`animal me`)
-   })
+      .assert(`animal blue`)
+      .assert(`animal me`)
+  })
 })
 
 test.failing(`once only gets called for existing assertions`, t => {
   const { room } = t.context
-  const asserts = new Set([ `first`, `second` ])
   t.plan(2)
 
   return new Promise((resolve, reject) => {
