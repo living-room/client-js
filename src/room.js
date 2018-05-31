@@ -13,6 +13,7 @@ function getEnv (key) {
 
 export default class Room {
   constructor (host) {
+    this._subscribeTimeout = 2500 // ms
     this._messages = []
     this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
@@ -87,7 +88,7 @@ export default class Room {
       const callback = facts.splice(facts.length - 1)[0]
       const subscription = JSON.stringify(facts)
 
-      const subscribed = data => {
+      const subscribed = _ => {
         clearTimeout(timeout)
         resolve()
       }
@@ -99,8 +100,8 @@ export default class Room {
 
       const timeout = setTimeout(() => {
         this._socket.off(subscription, unwrapped)
-        return reject(new Error('subscribe timed out after 1500ms'))
-      }, 1500)
+        reject(new Error(`subscribe timed out after ${this._subscribeTimeout}`))
+      }, this._subscribeTimeout)
 
       this._socket.on(subscription, unwrapped)
       this._socket.emit('subscribe', facts, subscribed)
