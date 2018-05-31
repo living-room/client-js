@@ -107,7 +107,7 @@ export default class Room {
     })
   }
 
-  _unwrap ({assertions, retractions}) {
+  _unwrap ({ assertions, retractions }) {
     const unwrap = fact => {
       const unwrapped = {}
       for (let key in fact) {
