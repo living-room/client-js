@@ -1,6 +1,6 @@
 {
   "name": "@living-room/client-js",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "description": "commandline, node.js, and browser client for living room server",
   "main": "build/room.js",
   "browser": "build/room.browser.js",
@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "ava": "^1.0.0-beta.4",
+    "callable-instance": "^1.0.0",
     "chance": "^1.0.16",
     "nbonjour": "^3.6.1",
     "node-fetch": "^2.1.2",

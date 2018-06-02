@@ -6,13 +6,15 @@
 import fetch from 'node-fetch'
 import io from 'socket.io-client'
 import bonjour from 'nbonjour'
+import CallableInstance from 'callable-instance'
 
 function getEnv (key) {
   if (typeof process !== 'undefined') return process.env[key]
 }
 
-export default class Room {
+export default class Room extends CallableInstance {
   constructor (host) {
+    super('_enqueue')
     this._subscribeTimeout = 2500 // ms
     this._messages = []
     this._host = host || getEnv('LIVING_ROOM_HOST') || 'http://localhost:3000'
@@ -67,9 +69,7 @@ export default class Room {
     const patternsString = JSON.stringify(facts)
 
     const unwrapped = results => {
-      console.log(`in unwrapped`)
       const unwrappedResults = this._unwrap(results)
-      console.log(unwrappedResults)
       callback(unwrappedResults)
     }
     this._socket.off(patternsString, unwrapped)

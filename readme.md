@@ -19,11 +19,11 @@ room
 ## batched
 
 ```js
-room.send(
+room([
   {assert: 'thing to assert'},
   {retract: 'thing to retract'},
   {assert: 'thing to assert'}
-)
+])
 ```
 
 We are open to other experimentation, check the [issue tracker](https://github.com/living-room/client-js/issues) for more discussion

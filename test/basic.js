@@ -81,6 +81,34 @@ test(`multiple asserts`, t => {
   })
 })
 
+test(`fancy callable`, t => {
+  t.plan(5)
+  const { room } = t.context
+  const animal = new Set([
+    `party`,
+    `car`,
+    `animal`,
+    `well`,
+    `me`
+  ])
+
+  return new Promise((resolve, reject) => {
+    room.on(`animal $what`, ({what}) => {
+      t.true(animal.delete(what))
+      if (animal.size === 0) resolve()
+    })
+
+    room([{ assert: `animal party` },
+      { assert: `animal car` },
+      { assert: `animal animal` }
+    ])
+
+    room([{ assert: `animal well`},
+      { assert: `animal me`}
+    ])
+  })
+})
+
 test.failing(`once only gets called for existing assertions`, t => {
   const { room } = t.context
   t.plan(2)
