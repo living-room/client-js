@@ -13,15 +13,9 @@ test(`await assert`, async t => {
   const { facts } = await room.assert(`hello`)
   t.deepEqual(facts, [{assert: `hello`}])
 
-  return new Promise((resolve, reject) => {
-    room
-      .select(`$word`)
-      .then(result => {
-        t.deepEqual(result, [{
-          word: { word: `hello` }
-        }])
-        resolve()
-      })
+  return new Promise(async (resolve, reject) => {
+    const words = await room.select(`$word`)
+    resolve(t.deepEqual(words, [{word: { word: `hello` }}]))
   })
 })
 
@@ -98,14 +92,16 @@ test(`fancy callable`, t => {
       if (animal.size === 0) resolve()
     })
 
-    room([{ assert: `animal party` },
+    room(
+      { assert: `animal party` },
       { assert: `animal car` },
       { assert: `animal animal` }
-    ])
+    )
 
-    room([{ assert: `animal well`},
+    room(
+      { assert: `animal well`},
       { assert: `animal me`}
-    ])
+    )
   })
 })
 

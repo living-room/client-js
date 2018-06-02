@@ -195,37 +195,31 @@ export default class Room extends CallableInstance {
       })
   }
 
-  _enqueue (facts) {
+  _enqueue (...facts) {
     this.reset()
     this._messages.push(...facts)
     this._timeout = setTimeout(this.then.bind(this))
     return this
   }
 
-  send (...facts) {
-    return new Promise((resolve, reject) =>
-      this._enqueue(facts).then(resolve, reject)
-    )
-  }
-
   assert (...facts) {
-    return this._enqueue(facts.map(assert => ({ assert })))
+    return this._enqueue(...facts.map(assert => ({ assert })))
   }
 
   retract (...facts) {
-    return this._enqueue(facts.map(retract => ({ retract })))
+    return this._enqueue(...facts.map(retract => ({ retract })))
   }
 
   select (...facts) {
     return this._request(facts, 'select')
   }
 
-  count (facts) {
-    return this._request(facts, 'select').then(assertions => assertions.length)
+  count (...facts) {
+    return this.select(...facts).then(assertions => assertions.length)
   }
 
-  exists (facts) {
-    return this.count(facts).then(count => count > 0)
+  exists (...facts) {
+    return this.count(...facts).then(count => count > 0)
   }
 
   facts () {

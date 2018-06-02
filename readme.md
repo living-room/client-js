@@ -10,20 +10,19 @@ There are two ways to use it
 
 ```js
 room
-  .assert()
-  .retract()
-  .assert()
-  .then() // don't forget this or it won't fire!
+  .assert('one thing')
+  .retract('two thing')
+  .assert('red thing, blue thing')
 ```
 
 ## batched
 
 ```js
-room([
+room(
   {assert: 'thing to assert'},
   {retract: 'thing to retract'},
   {assert: 'thing to assert'}
-])
+)
 ```
 
 We are open to other experimentation, check the [issue tracker](https://github.com/living-room/client-js/issues) for more discussion

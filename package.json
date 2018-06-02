@@ -1,6 +1,6 @@
 {
   "name": "@living-room/client-js",
-  "version": "0.6.12",
+  "version": "0.6.13",
   "description": "commandline, node.js, and browser client for living room server",
   "main": "build/room.js",
   "browser": "build/room.browser.js",
