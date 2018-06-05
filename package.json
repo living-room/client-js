@@ -11,7 +11,8 @@
   "author": "Jonathan Dahan",
   "license": "MIT",
   "devDependencies": {
-    "@living-room/service-js": "^0.6.13"
+    "@living-room/service-js": "^0.6.13",
+    "husky": "^1.0.0-rc.8"
   },
   "scripts": {
     "format": "prettier-standard src/room.js",
@@ -44,5 +45,9 @@
     "rollup-plugin-node-resolve": "^3.3.0",
     "serve": "^7.2.0",
     "socket.io-client": "^2.1.1"
+  },
+  "husky": {
+    "pre-commit": "npm-run-all -s format test",
+    "pre-push": "npm-run-all -s format test"
   }
 }
