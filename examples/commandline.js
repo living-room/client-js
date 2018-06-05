@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-/// A node.js commandline example
+const pkg = require('../package.json')
+require('please-upgrade-node')(pkg)
 
 const printHelp = () => {
   console.error(`
