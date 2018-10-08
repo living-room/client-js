@@ -28,7 +28,7 @@ export default [{
     globals: {
       'node-fetch': 'fetch',
       'socket.io-client': 'io',
-      'bonjour': 'nbonjour'
+      'nbonjour': 'bonjour'
     }
   },
   plugins: [
