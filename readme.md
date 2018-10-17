@@ -124,7 +124,7 @@ room
 In addition to [examples/commandline.js](./examples/commandline.js), we have a few other [examples](./examples):
 
 ```javascript
-const Room = require('../build/room.js')
+const Room = require('../src/room.js')
 
 const room = new Room() // you can pass in the uri here or in LIVING_ROOM_HOST
 
@@ -196,7 +196,7 @@ install dependencies
 
     npm install
 
-build [node.js](./build/room.js) and [browser](./build/room.browser.js) libraries on changes
+edit the [node.js](./src/room.js) and [browser](./src/room.browser.js) libraries
 
     npm dev
 

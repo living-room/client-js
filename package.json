@@ -2,8 +2,8 @@
   "name": "@living-room/client-js",
   "version": "0.6.18",
   "description": "commandline, node.js, and browser client for living room server",
-  "main": "build/room.js",
-  "browser": "build/room.browser.js",
+  "main": "src/room.js",
+  "browser": "src/room.browser.js",
   "bin": {
     "room": "examples/commandline.js"
   },
@@ -16,8 +16,6 @@
   },
   "scripts": {
     "format": "prettier-standard src/room.js",
-    "build": "rollup -c",
-    "build:watch": "rollup -c -w",
     "test": "ava",
     "test:watch": "ava -w",
     "examples": "serve examples",
@@ -25,8 +23,8 @@
     "retract": "node examples/commandline.js retract",
     "select": "node examples/commandline.js select",
     "subscribe": "node examples/commandline.js subscribe",
-    "dev": "npm-run-all -p build:watch test:watch",
-    "prepare": "npm-run-all -s format build test"
+    "dev": "npm-run-all -p test:watch",
+    "prepare": "npm-run-all -s format test"
   },
   "dependencies": {
     "ava": "^1.0.0-beta.8",
@@ -38,11 +36,6 @@
     "phaser-ce": "^2.11.1",
     "please-upgrade-node": "^3.1.1",
     "prettier-standard": "^8.0.1",
-    "rollup": "^0.66.3",
-    "rollup-plugin-commonjs": "^9.1.8",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.2.1",
-    "rollup-plugin-node-resolve": "^3.4.0",
     "serve": "^10.0.2",
     "socket.io-client": "^2.1.1"
   },

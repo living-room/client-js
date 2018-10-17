@@ -3,28 +3,17 @@
  *
  * @param {host} host of living room server (defaults to http://localhost:3000)
  */
-const fetch = require('node-fetch')
-const bonjour = require('nbonjour')
-const io = require('socket.io-client')
 const CallableInstance = require('callable-instance')
 
-module.exports = class Room extends CallableInstance {
+export default class Room extends CallableInstance {
   constructor (host) {
     super('_enqueue')
     this._subscribeTimeout = 2500 // ms
     this._messages = []
-    this._host = host || process.env['LIVING_ROOM_HOST'] || 'http://localhost:3000'
+    this._host = host || 'http://localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
     this._hosts = new Set([this._host])
     this.connect()
-
-    const serviceDefinition = { type: 'http', subtypes: ['livingroom'] }
-    this._browser = bonjour.create().find(serviceDefinition, service => {
-      const { type, host, port } = service
-      const uri = `${type}://${host}:${port}`
-      if (this._hosts.has(uri)) return
-      this._hosts.add(uri)
-    })
   }
 
   reset () {

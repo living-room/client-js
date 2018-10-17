@@ -1,6 +1,6 @@
 const test = require(`ava`)
 const { listen } = require(`@living-room/service-js`)
-const Room = require(`../build/room`)
+const Room = require(`../src/room`)
 
 test.beforeEach(async t => {
   const { port } = await listen({verbose: false})

@@ -1,4 +1,4 @@
-const Room = require('../build/room.js')
+const Room = require('../src/room.js')
 const room = new Room()
 
 room.select('$a is a $b animal at ($c, $d)').then(console.dir)
