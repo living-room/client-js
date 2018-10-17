@@ -13,7 +13,8 @@ module.exports = class Room extends CallableInstance {
     super('_enqueue')
     this._subscribeTimeout = 2500 // ms
     this._messages = []
-    this._host = host || process.env['LIVING_ROOM_HOST'] || 'http://localhost:3000'
+    this._host =
+      host || process.env['LIVING_ROOM_HOST'] || 'http://localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
     this._hosts = new Set([this._host])
     this.connect()

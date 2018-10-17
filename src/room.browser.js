@@ -3,7 +3,9 @@
  *
  * @param {host} host of living room server (defaults to http://localhost:3000)
  */
-const CallableInstance = require('callable-instance')
+//const CallableInstance = require('callable-instance')
+
+import CallableInstance from 'callable-instance'
 
 export default class Room extends CallableInstance {
   constructor (host) {
