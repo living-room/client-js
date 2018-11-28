@@ -1,4 +1,4 @@
 node_modules
-src/room.browser.prod.js
+src/room.browser.prod.js*
 .DS_Store
 build
