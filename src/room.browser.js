@@ -168,6 +168,7 @@ export default class Room extends CallableInstance {
         return response
       })
       .catch(error => {
+        console.log({error})
         if (error.code === 'ECONNREFUSED') {
           const customError = new Error(
             `No server listening on ${uri}. Try 'npm start' to run a local service.`

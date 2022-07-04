@@ -14,8 +14,9 @@ test(`await assert`, async t => {
   t.deepEqual(facts, [{assert: `hello`}])
 
   return new Promise(async (resolve, reject) => {
-    const words = await room.select(`$word`)
-    resolve(t.deepEqual(words, [{word: { word: `hello` }}]))
+    room.select(`$word`)
+      .then(words => resolve(t.deepEqual(words, [{word: { word: `hello` }}])))
+      .catch(reject)
   })
 })
 
@@ -108,22 +109,28 @@ test(`fancy callable`, t => {
 test.failing(`once only gets called for existing assertions`, t => {
   const { room } = t.context
   t.plan(2)
+  let callback = false
+  console.log('in callback')
+  room.once(`$number`, ({ number }) => {
+    console.log('ok')
+    console.log({number})
+    if (callback) return
+    t.true([`first`, `second`].includes(number))
+    callback = true
+  }).then(console.log).catch(console.error)
+
+  console.log('still')
+  
+  room
+    .assert(`first`)
+    .assert(`second`)
+
+  console.log('still')
 
   return new Promise((resolve, reject) => {
-    let callback = false
-
-    room.once(`$number`, ({number}) => {
-      if (callback) return
-      t.true([`first`, `second`].includes(number))
-      callback = true
-    })
-
-    room
-      .assert(`first`)
-      .assert(`second`)
-
     setTimeout(() => {
-      room.assert(`third`).then(resolve)
+      console.log('timeout hit')
+      room.assert(`third`).then(resolve).catch(reject)
     }, 150)
   })
 })

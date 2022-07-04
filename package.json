@@ -16,11 +16,12 @@
   "author": "Jonathan Dahan",
   "license": "MIT",
   "devDependencies": {
-    "@living-room/service-js": "^0.6"
+    "@living-room/service-js": "^0.6",
+    "rollup": "^2.75.7"
   },
   "scripts": {
-    "build": "rollup",
-    "build:watch": "rollup --watch",
+    "build": "rollup --config",
+    "build:watch": "rollup --config --watch",
     "lint": "standard src/room.js src/room.browser.js",
     "format": "npm run lint -- --fix",
     "test": "ava",

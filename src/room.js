@@ -170,7 +170,7 @@ export default class Room extends CallableInstance {
       .then(response => response.json())
       .then(response => {
         if (response) {
-          const mapped = response.facts.map(JSON.stringify)
+          const mapped = response?.facts?.map(JSON.stringify)
           this._messages = this._messages.filter(
             message => !mapped.includes(JSON.stringify(message))
           )
