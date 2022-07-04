@@ -1,5 +1,5 @@
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 
 export default {
   input: 'src/room.browser.js',
@@ -8,9 +8,11 @@ export default {
     name: 'LivingRoom',
     format: 'iife'
   },
-  plugins: [ resolve({
+  plugins: [
+    resolve({
       jsnext: true,
       main: true
     }),
-    commonjs() ]
+    commonjs()
+  ]
 }
