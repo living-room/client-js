@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-const pkg = require('../package.json')
-require('please-upgrade-node')(pkg)
 
 const printHelp = () => {
   console.error(`
@@ -28,7 +26,7 @@ const printHelp = () => {
 
 if (process.argv.length < 2) process.exit(printHelp())
 
-const Room = require('../src/room.js')
+import Room from '../src/room.js'
 const room = new Room() // Defaults to http://localhost:3000
 
 const facts = process.argv.slice(3)[0]

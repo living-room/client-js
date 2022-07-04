@@ -4,6 +4,7 @@
  * @param {host} host of living room server (defaults to http://localhost:3000)
  */
 
+/* global io */
 import CallableInstance from 'callable-instance'
 
 export default class Room extends CallableInstance {
@@ -95,7 +96,7 @@ export default class Room extends CallableInstance {
   _unwrap ({ assertions, retractions }) {
     const unwrap = fact => {
       const unwrapped = {}
-      for (let key in fact) {
+      for (const key in fact) {
         const val = fact[key]
         if (typeof val === 'undefined') continue
         unwrapped[key] = val.value || val.word || val.text || val.id
@@ -150,7 +151,7 @@ export default class Room extends CallableInstance {
     const uri = `${this._host}/${endpoint}`
 
     const opts = {
-      method: method,
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ facts })
     }
@@ -168,7 +169,7 @@ export default class Room extends CallableInstance {
       })
       .catch(error => {
         if (error.code === 'ECONNREFUSED') {
-          let customError = new Error(
+          const customError = new Error(
             `No server listening on ${uri}. Try 'npm start' to run a local service.`
           )
           customError.code = 'NOTLISTENING'

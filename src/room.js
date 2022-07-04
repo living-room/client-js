@@ -3,18 +3,18 @@
  *
  * @param {host} host of living room server (defaults to http://localhost:3000)
  */
-const fetch = require('node-fetch')
-const bonjour = require('nbonjour')
-const io = require('socket.io-client')
-const CallableInstance = require('callable-instance')
+import fetch from 'node-fetch'
+import bonjour from 'nbonjour'
+import io from 'socket.io-client'
+import CallableInstance from 'callable-instance'
 
-module.exports = class Room extends CallableInstance {
+export default class Room extends CallableInstance {
   constructor (host) {
     super('_enqueue')
     this._subscribeTimeout = 2500 // ms
     this._messages = []
     this._host =
-      host || process.env['LIVING_ROOM_HOST'] || 'http://localhost:3000'
+      host || process.env.LIVING_ROOM_HOST || 'http://localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
     this._hosts = new Set([this._host])
     this.connect()
@@ -106,7 +106,7 @@ module.exports = class Room extends CallableInstance {
   _unwrap ({ assertions, retractions }) {
     const unwrap = fact => {
       const unwrapped = {}
-      for (let key in fact) {
+      for (const key in fact) {
         const val = fact[key]
         if (typeof val === 'undefined') continue
         unwrapped[key] = val.value || val.word || val.text || val.id
@@ -161,7 +161,7 @@ module.exports = class Room extends CallableInstance {
     const uri = `${this._host}/${endpoint}`
 
     const opts = {
-      method: method,
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ facts })
     }
@@ -179,7 +179,7 @@ module.exports = class Room extends CallableInstance {
       })
       .catch(error => {
         if (error.code === 'ECONNREFUSED') {
-          let customError = new Error(
+          const customError = new Error(
             `No server listening on ${uri}. Try 'npm start' to run a local service.`
           )
           customError.code = 'NOTLISTENING'

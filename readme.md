@@ -124,7 +124,7 @@ room
 In addition to [examples/commandline.js](./examples/commandline.js), we have a few other [examples](./examples):
 
 ```javascript
-const Room = require('../src/room.js')
+import Room from '../src/room.js'
 
 const room = new Room() // you can pass in the uri here or in LIVING_ROOM_HOST
 

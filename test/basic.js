@@ -1,6 +1,6 @@
-const test = require(`ava`)
-const { listen } = require(`@living-room/service-js`)
-const Room = require(`../src/room`)
+import test from 'ava'
+import { listen } from '@living-room/service-js'
+import Room from '../src/room.js'
 
 test.beforeEach(async t => {
   const { port } = await listen({verbose: false})
