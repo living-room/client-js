@@ -3,7 +3,7 @@ import { listen } from '@living-room/service-js'
 import Room from '../src/room.js'
 
 test.beforeEach(async t => {
-  const { port } = await listen({verbose: false})
+  const { port } = await listen({ verbose: false })
   t.context.room = new Room(`http://localhost:${port}`)
 })
 
@@ -23,11 +23,11 @@ test(`await assert`, async t => {
 test(`no callback subscribe`, async t => {
   t.plan(2)
   const { room } = t.context
-  room.assert(`no callback assert`)
+  room.assert(`no callback subscribe`)
 
   return new Promise((resolve, reject) => {
     room
-      .subscribe(`$what callback assert`, ({assertions, retractions}) => {
+      .subscribe(`$what callback subscribe`, ({assertions, retractions}) => {
         t.deepEqual(assertions, [{what: `no`}])
         t.deepEqual(retractions, [])
         resolve()
@@ -106,35 +106,6 @@ test(`fancy callable`, t => {
   })
 })
 
-test.failing(`once only gets called for existing assertions`, t => {
-  const { room } = t.context
-  t.plan(2)
-  let callback = false
-  console.log('in callback')
-  room.once(`$number`, ({ number }) => {
-    console.log('ok')
-    console.log({number})
-    if (callback) return
-    t.true([`first`, `second`].includes(number))
-    callback = true
-  }).then(console.log).catch(console.error)
-
-  console.log('still')
-  
-  room
-    .assert(`first`)
-    .assert(`second`)
-
-  console.log('still')
-
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log('timeout hit')
-      room.assert(`third`).then(resolve).catch(reject)
-    }, 150)
-  })
-})
-
 test(`called for all assertions`, t => {
   const { room } = t.context
 
@@ -153,38 +124,5 @@ test(`called for all assertions`, t => {
 
     room
       .assert(`third`)
-  })
-})
-
-test.failing('setImmediate clears calls a second time', t => {
-  const { room } = t.context
-
-  let times = 0
-
-  return new Promise((resolve, reject) => {
-    const processed = response => {
-      if (times === 0) {
-        t.deepEqual(response, {facts: [{assert: 'this'}, {assert: 'is'}, {assert: 'cool'}]})
-      } else if (times === 1) {
-        t.deepEqual(response, {facts: [{assert: 'like'}, {assert: 'the'}, {assert: 'coolest'}]})
-        resolve()
-      }
-      times++
-    }
-
-    room
-      .assert('this')
-      .assert('is')
-      .assert('cool')
-      .then(processed)
-
-    // What is interesting, is that setTimeout with ms >= 50 works
-    setImmediate(() => {
-      room
-        .assert('like')
-        .assert('the')
-        .assert('coolest')
-        .then(processed)
-    }, 50)
   })
 })
