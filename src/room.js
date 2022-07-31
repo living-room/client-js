@@ -6,15 +6,12 @@
 import fetch from 'node-fetch'
 import bonjour from 'nbonjour'
 import io from 'socket.io-client'
-import CallableInstance from 'callable-instance'
 
-export default class Room extends CallableInstance {
+export default class Room {
   constructor (host) {
-    super('_enqueue')
     this._subscribeTimeout = 2500 // ms
     this._messages = []
-    this._host =
-      host || process.env.LIVING_ROOM_HOST || 'http://localhost:3000'
+    this._host = host || process.env.LIVING_ROOM_HOST || 'localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
     this._hosts = new Set([this._host])
     this.connect()
@@ -23,7 +20,6 @@ export default class Room extends CallableInstance {
     this._browser = bonjour.create().find(serviceDefinition, service => {
       const { type, host, port } = service
       const uri = `${type}://${host}:${port}`
-      if (this._hosts.has(uri)) return
       this._hosts.add(uri)
     })
   }
@@ -48,6 +44,7 @@ export default class Room extends CallableInstance {
 
   connect () {
     this._socket = io(this._host)
+    this._socket.on('error', (error) => console.error(error))
     if (typeof window === 'object') {
       this._socket.on('reconnect', () => {
         window.location.reload(true)
@@ -69,7 +66,7 @@ export default class Room extends CallableInstance {
     }
     this._socket.off(patternsString, unwrapped)
 
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       this._socket.emit('unsubscribe', patternsString, resolve)
     })
   }
@@ -83,23 +80,14 @@ export default class Room extends CallableInstance {
       const callback = facts.splice(facts.length - 1)[0]
       const subscription = JSON.stringify(facts)
 
-      const subscribed = _ => {
-        clearTimeout(timeout)
-        resolve()
-      }
+      this._socket.on('error', reject)
+      this._socket.on('subscribe', resolve)
 
-      const unwrapped = results => {
+      this._socket.on(subscription, results => {
         const unwrappedResults = this._unwrap(results)
         callback(unwrappedResults)
-      }
-
-      const timeout = setTimeout(() => {
-        this._socket.off(subscription, unwrapped)
-        reject(new Error(`subscribe timed out after ${this._subscribeTimeout}`))
-      }, this._subscribeTimeout)
-
-      this._socket.on(subscription, unwrapped)
-      this._socket.emit('subscribe', facts, subscribed)
+      })
+      this._socket.emit('subscribe', facts)
     })
   }
 

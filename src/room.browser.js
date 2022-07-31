@@ -72,24 +72,23 @@ export default class Room extends CallableInstance {
     return new Promise((resolve, reject) => {
       const callback = facts.splice(facts.length - 1)[0]
       const subscription = JSON.stringify(facts)
+      console.log(`subscribing to '${subscription}'`)
 
-      const subscribed = _ => {
-        clearTimeout(timeout)
-        resolve()
-      }
+      // const timeout = setTimeout(() => {
+      //   this._socket.off(subscription)
+      //   reject(new Error(`subscribe timed out after ${this._subscribeTimeout}`))
+      // }, this._subscribeTimeout)
 
-      const unwrapped = results => {
+      this._socket.on(subscription, results => {
         const unwrappedResults = this._unwrap(results)
         callback(unwrappedResults)
-      }
+      })
 
-      const timeout = setTimeout(() => {
-        this._socket.off(subscription, unwrapped)
-        reject(new Error(`subscribe timed out after ${this._subscribeTimeout}`))
-      }, this._subscribeTimeout)
-
-      this._socket.on(subscription, unwrapped)
-      this._socket.emit('subscribe', facts, subscribed)
+      this._socket.on(subscription, (data) => {
+        console.log(`got a subscription to ${subscription}`)
+        // clearTimeout(timeout)
+        resolve()
+      })
     })
   }
 
@@ -160,7 +159,7 @@ export default class Room extends CallableInstance {
       .then(response => response.json())
       .then(response => {
         if (response) {
-          const mapped = response.facts.map(JSON.stringify)
+          const mapped = response?.facts?.map(JSON.stringify)
           this._messages = this._messages.filter(
             message => !mapped.includes(JSON.stringify(message))
           )
@@ -168,7 +167,7 @@ export default class Room extends CallableInstance {
         return response
       })
       .catch(error => {
-        console.log({error})
+        console.error(error)
         if (error.code === 'ECONNREFUSED') {
           const customError = new Error(
             `No server listening on ${uri}. Try 'npm start' to run a local service.`

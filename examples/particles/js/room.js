@@ -1,5 +1,5 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('node-fetch'), require('socket.io-client')) :
+	typeof exports === 'object' && typeof module !== 'undefined' ? export default factory(require('node-fetch'), require('socket.io-client')) :
 	typeof define === 'function' && define.amd ? define(['node-fetch', 'socket.io-client'], factory) :
 	(global.room = factory(global.fetch,global.io));
 }(this, (function (fetch,io) { 'use strict';
