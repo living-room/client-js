@@ -8,44 +8,41 @@ test.before(async t => {
   t.context.room = new Room(`http://localhost:${port}`)
 })
 
-test('await assert', async t => {
-  t.plan(2)
+test('assertions are selectable', async t => {
   const { room } = t.context
-  const { facts } = await room.assert('hello')
-  t.deepEqual(facts, [{ assert: 'hello' }])
-
-  return new Promise((resolve, reject) => {
-    room.select('$word')
-      .then(words => resolve(t.deepEqual(words, [{ word: { word: 'hello' } }])))
-      .catch(reject)
-  })
+  await room.assert('hello').send()
+  const facts = await room.select('$singleword')
+  t.is(facts.length, 1)
+  t.deepEqual(facts, [{singleword: {word: 'hello'}}])
 })
 
-test('no callback subscribe', async t => {
-  t.plan(2)
+test('on() callbacks are called', t => {
   const { room } = t.context
-  room.assert('no callback subscribe')
 
-  return new Promise((resolve, reject) => {
-    room
-      .subscribe('$what callback subscribe', ({ assertions, retractions }) => {
-        t.deepEqual(assertions, [{ what: 'no' }])
-        t.deepEqual(retractions, [])
-        resolve()
-      })
-  })
-})
-
-test('no callback assert', t => {
-  t.plan(1)
-  const { room } = t.context
-  return new Promise((resolve, reject) => {
-    room.on('$what callback assert', ({ what }) => {
-      t.is(what, 'no')
+  return new Promise(resolve => {
+    room.on('on is $adjective', ({ adjective }) => {
+      t.is(adjective, 'cool')
       resolve()
     })
 
-    room.assert('no callback assert')
+    room.assert(`on is cool`).send()
+  })
+})
+
+test('subscription() callbacks are called', async t => {
+  const { room } = t.context
+  const adjective = 'cool'
+
+  return new Promise((resolve, reject) => {
+    room
+      .subscribe('subscription callbacks are $adjective', ({ assertions, retractions }) => {
+        t.deepEqual(assertions, [{ adjective }])
+        t.deepEqual(retractions, [])
+        resolve()
+      })
+      .catch(reject)
+
+    room.assert(`subscription callbacks are ${adjective}`).send()
   })
 })
 
@@ -60,7 +57,7 @@ test('multiple asserts', t => {
     'me'
   ])
 
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     room.on('animal $what', ({ what }) => {
       t.true(animal.delete(what))
       if (animal.size === 0) resolve()
@@ -74,6 +71,7 @@ test('multiple asserts', t => {
     room
       .assert('animal blue')
       .assert('animal me')
+      .send()
   })
 })
 
@@ -88,42 +86,21 @@ test('fancy callable', t => {
     'me'
   ])
 
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     room.on('animal $what', ({ what }) => {
       t.true(animal.delete(what))
       if (animal.size === 0) resolve()
     })
 
-    room(
-      { assert: 'animal party' },
-      { assert: 'animal car' },
-      { assert: 'animal animal' }
+    room.assert(
+      'animal party' ,
+      'animal car' ,
+      'animal animal',
     )
 
-    room(
-      { assert: 'animal well' },
-      { assert: 'animal me' }
-    )
-  })
-})
-
-test('called for all assertions', t => {
-  const { room } = t.context
-
-  return new Promise((resolve, reject) => {
-    const asserts = new Set(['first', 'second', 'third'])
-    t.plan(asserts.size)
-
-    room.on('$what', ({ what }) => {
-      t.true(asserts.delete(what))
-      if (!asserts.size) resolve()
-    })
-
-    room
-      .assert('first')
-      .assert('second')
-
-    room
-      .assert('third')
+    room.assert(
+      'animal well',
+      'animal me',
+    ).send()
   })
 })

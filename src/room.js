@@ -1,5 +1,6 @@
 /**
- * Creates a new http client to a roomdb instance
+ * Creates a new client to a roomdb instance
+ * This client will try and communicate over socket.io or http
  *
  * @param {host} host of living room server (defaults to http://localhost:3000)
  */
@@ -22,15 +23,6 @@ export default class Room {
       const uri = `${type}://${host}:${port}`
       this._hosts.add(uri)
     })
-  }
-
-  reset () {
-    clearTimeout(this._timeout)
-  }
-
-  then (onResolve, onReject) {
-    this.reset()
-    return this._request().then(onResolve, onReject)
   }
 
   nexthost () {
@@ -72,18 +64,24 @@ export default class Room {
   }
 
   /**
+   * Subscribe lets a callback listen to all assertions and retractions
+   * Compare to .on() which fires off only for assertions
+   *
    * @param {String} ...facts
    * @param {Function} callback
    */
   subscribe (...facts) {
-    return new Promise((resolve, reject) => {
-      const callback = facts.splice(facts.length - 1)[0]
-      const subscription = JSON.stringify(facts)
+    const callback = facts.splice(facts.length - 1)[0]
+    const subscription = JSON.stringify(facts)
+    // console.log({ subscription, callback })
 
+    return new Promise((resolve, reject) => {
       this._socket.on('error', reject)
       this._socket.on('subscribe', resolve)
 
       this._socket.on(subscription, results => {
+        // this.facts().then(f => console.log(f))
+        // console.log({ results })
         const unwrappedResults = this._unwrap(results)
         callback(unwrappedResults)
       })
@@ -120,36 +118,11 @@ export default class Room {
     this.unsubscribe(...facts, cb)
   }
 
-  /**
-   *
-   * @param {[String]} facts array of messages to send
-   * @param {String: messages | facts | select } endpoint
-   * @param {String: GET | POST} method http method to use
-   */
-  _request (facts, endpoint = 'messages', method = 'POST') {
-    facts = facts || this._messages
-    if (endpoint !== 'facts' && !facts.length) {
-      throw new Error(`Please pass at least one fact for ${endpoint}`)
-    }
-
-    if (this._socket.connected) {
-      return new Promise((resolve, reject) => {
-        const cb = result => {
-          const mapped = result.map(JSON.stringify)
-          this._messages = this._messages.filter(
-            message => !mapped.includes(JSON.stringify(message))
-          )
-          resolve(result)
-        }
-
-        this._socket.emit(endpoint, facts, cb)
-      })
-    }
-
+  _fetch (endpoint, facts) {
     const uri = `${this._host}/${endpoint}`
 
     const opts = {
-      method,
+      method: endpoint === 'facts' ? 'GET' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ facts })
     }
@@ -178,11 +151,41 @@ export default class Room {
       })
   }
 
+  _emit(endpoint, facts) {
+    return new Promise(resolve => {
+      const cb = result => {
+        const mapped = result.map(JSON.stringify)
+        this._messages = this._messages.filter(
+          message => !mapped.includes(JSON.stringify(message))
+        )
+        resolve(result)
+      }
+
+      this._socket.emit(endpoint, facts, cb)
+    })
+  }
+
+  /**
+   * @param {String: messages | facts | select } endpoint
+   * @param {String[]} facts array of messages to send
+   */
+  send (endpoint = 'messages', facts = this._messages) {
+    if (endpoint !== 'facts' && !(facts.length > 0))
+      throw new Error(`Please pass at least one fact for ${endpoint}`)
+
+    if (this._socket.connected)
+      return this._emit(endpoint, facts)
+
+    return this._fetch(endpoint, facts)
+  }
+
   _enqueue (...facts) {
-    this.reset()
     this._messages.push(...facts)
-    this._timeout = setTimeout(this.then.bind(this))
     return this
+  }
+
+  facts () {
+    return this.send('facts')
   }
 
   assert (...facts) {
@@ -194,7 +197,7 @@ export default class Room {
   }
 
   select (...facts) {
-    return this._request(facts, 'select')
+    return this.send('select', facts)
   }
 
   count (...facts) {
@@ -203,9 +206,5 @@ export default class Room {
 
   exists (...facts) {
     return this.count(...facts).then(count => count > 0)
-  }
-
-  facts () {
-    return this._request('facts', undefined, 'GET')
   }
 }
