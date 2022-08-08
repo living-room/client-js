@@ -37,11 +37,11 @@ const verbose = ['--verbose', '-v'].some(
 async function main () {
   switch (process.argv[2]) {
     case 'assert':
-      return room.assert(facts).then(console.log)
+      return room.assert(facts).send().then(console.log)
     case 'retract':
-      return room.retract(facts).then(console.log)
+      return room.retract(facts).send().then(console.log)
     case 'select':
-      return room.select(facts).then(({assertions}) => console.dir(assertions))
+      return room.select(facts).send().then(({assertions}) => console.dir(assertions))
     case 'subscribe':
       return new Promise(resolve => {
         let delay = 100
