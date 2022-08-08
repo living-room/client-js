@@ -2,7 +2,7 @@ import test from 'ava'
 import LivingRoomService from '@living-room/service-js'
 import Room from '../src/room.js'
 
-test.before(async t => {
+test.beforeEach(async t => {
   const room = new LivingRoomService()
   const { port } = await room.listen()
   t.context.room = new Room(`http://localhost:${port}`)
