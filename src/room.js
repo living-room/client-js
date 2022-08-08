@@ -96,55 +96,36 @@ export default class Room {
     this.unsubscribe(...facts, cb)
   }
 
-  /**
-   * @param {String: messages | facts | select } endpoint
-   * @param {String[]} facts array of messages to send
-   */
-  send (endpoint = 'messages', facts = this._messages) {
-    if (endpoint !== 'facts' && !(facts.length > 0))
-      throw new Error(`Please pass at least one fact for ${endpoint}`)
+  async send () {
+    const messages = this._messages.splice(0, this._messages.length)
 
-    return new Promise((resolve, reject) => {
-      if (!this._socket.connected) reject(`No connection to socket.io`)
-
-      const cb = result => {
-        const mapped = result.map(JSON.stringify)
-        this._messages = this._messages.filter(
-          message => !mapped.includes(JSON.stringify(message))
-        )
-        resolve(result)
-      }
-
-      this._socket.emit(endpoint, facts, cb)
-    })
-  }
-
-  _enqueue (...facts) {
-    this._messages.push(...facts)
-    return this
-  }
-
-  facts () {
-    return this.send('facts')
+    return Promise.all(messages.map(verb => {
+      if (verb.assert) return this._socket.emit('assert', verb.assert)
+      if (verb.retract) return this._socket.emit('retract', verb.retract)
+    }))
   }
 
   assert (...facts) {
-    return this._enqueue(...facts.map(assert => ({ assert })))
+    this._messages.push(...facts.map(assert => ({ assert })))
+    return this
   }
 
   retract (...facts) {
-    return this._enqueue(...facts.map(retract => ({ retract })))
+    this._messages.push(...facts.map(retract => ({ retract })))
+    return this
   }
 
   select (...facts) {
-    return this.send('select', facts)
+    return new Promise(resolve => {
+      this._socket.emit('select', facts, resolve)
+    })
   }
 
-  count (...facts) {
+  async count (...facts) {
     return this.select(...facts).then(assertions => assertions.length)
   }
 
-  exists (...facts) {
+  async exists (...facts) {
     return this.count(...facts).then(count => count > 0)
   }
 }

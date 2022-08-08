@@ -32,13 +32,20 @@ test('on() callbacks are called', t => {
 test('subscription() callbacks are called', async t => {
   const { room } = t.context
   const adjective = 'cool'
+  let callbacks = 0
+  t.plan(4)
 
   return new Promise((resolve, reject) => {
     room
       .subscribe('subscription callbacks are $adjective', ({ assertions, retractions }) => {
-        t.deepEqual(assertions, [{ adjective }])
-        t.deepEqual(retractions, [])
-        resolve()
+        if (callbacks++ == 0) {
+          t.deepEqual(assertions, [])
+          t.deepEqual(retractions, [])
+        } else {
+          t.deepEqual(assertions, [{ adjective }])
+          t.deepEqual(retractions, [])
+          resolve()
+        }
       })
       .catch(reject)
 
