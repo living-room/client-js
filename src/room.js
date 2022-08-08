@@ -4,9 +4,8 @@
  *
  * @param {host} host of living room server (defaults to http://localhost:3000)
  */
-import fetch from 'node-fetch'
-import bonjour from 'nbonjour'
-import io from 'socket.io-client'
+
+import { io } from 'socket.io-client'
 
 export default class Room {
   constructor (host) {
@@ -15,26 +14,7 @@ export default class Room {
     this._host = host || process.env.LIVING_ROOM_HOST || 'localhost:3000'
     if (!this._host.startsWith('http://')) this._host = `http://${this._host}`
     this._hosts = new Set([this._host])
-    this.connect()
 
-    const serviceDefinition = { type: 'http', subtypes: ['livingroom'] }
-    this._browser = bonjour.create().find(serviceDefinition, service => {
-      const { type, host, port } = service
-      const uri = `${type}://${host}:${port}`
-      this._hosts.add(uri)
-    })
-  }
-
-  nexthost () {
-    io.disconnect(this._host)
-    const ordered = Array.from(this._hosts.values()).sort()
-    const index = ordered.indexOf(this._host)
-    console.write(`switching from ${this._host}`)
-    this._host = ordered[(index + 1) % ordered.length]
-    this.connect()
-  }
-
-  connect () {
     this._socket = io(this._host)
     this._socket.on('error', (error) => console.error(error))
     if (typeof window === 'object') {
@@ -116,41 +96,17 @@ export default class Room {
     this.unsubscribe(...facts, cb)
   }
 
-  _fetch (endpoint, facts) {
-    const uri = `${this._host}/${endpoint}`
+  /**
+   * @param {String: messages | facts | select } endpoint
+   * @param {String[]} facts array of messages to send
+   */
+  send (endpoint = 'messages', facts = this._messages) {
+    if (endpoint !== 'facts' && !(facts.length > 0))
+      throw new Error(`Please pass at least one fact for ${endpoint}`)
 
-    const opts = {
-      method: endpoint === 'facts' ? 'GET' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ facts })
-    }
+    return new Promise((resolve, reject) => {
+      if (!this._socket.connected) reject(`No connection to socket.io`)
 
-    return fetch(uri, opts)
-      .then(response => response.json())
-      .then(response => {
-        if (response) {
-          const mapped = response?.facts?.map(JSON.stringify)
-          this._messages = this._messages.filter(
-            message => !mapped.includes(JSON.stringify(message))
-          )
-        }
-        return response
-      })
-      .catch(error => {
-        if (error.code === 'ECONNREFUSED') {
-          const customError = new Error(
-            `No server listening on ${uri}. Try 'npm start' to run a local service.`
-          )
-          customError.code = 'NOTLISTENING'
-          throw customError
-        } else {
-          throw error
-        }
-      })
-  }
-
-  _emit(endpoint, facts) {
-    return new Promise(resolve => {
       const cb = result => {
         const mapped = result.map(JSON.stringify)
         this._messages = this._messages.filter(
@@ -161,20 +117,6 @@ export default class Room {
 
       this._socket.emit(endpoint, facts, cb)
     })
-  }
-
-  /**
-   * @param {String: messages | facts | select } endpoint
-   * @param {String[]} facts array of messages to send
-   */
-  send (endpoint = 'messages', facts = this._messages) {
-    if (endpoint !== 'facts' && !(facts.length > 0))
-      throw new Error(`Please pass at least one fact for ${endpoint}`)
-
-    if (this._socket.connected)
-      return this._emit(endpoint, facts)
-
-    return this._fetch(endpoint, facts)
   }
 
   _enqueue (...facts) {

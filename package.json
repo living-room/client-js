@@ -4,7 +4,6 @@
   "description": "commandline, node.js, and browser client for living room server",
   "main": "src/room.js",
   "type": "module",
-  "browser": "src/room.browser.js",
   "engines": {
     "node": "16",
     "npm": "8"
@@ -17,15 +16,10 @@
   "license": "MIT",
   "devDependencies": {
     "@living-room/service-js": "^0.7.0",
-    "@rollup/plugin-commonjs": "^22.0.1",
-    "@rollup/plugin-node-resolve": "^13.3.0",
-    "koa-socket.io": "^2.0.0",
-    "rollup": "^2.75.7"
+    "koa-socket.io": "^2.0.0"
   },
   "scripts": {
-    "build": "rollup --config",
-    "build:watch": "rollup --config --watch",
-    "lint": "standard test/basic.js src/room.js src/room.browser.js",
+    "lint": "standard test/basic.js src/room.js",
     "format": "npm run lint -- --fix",
     "test": "ava",
     "test:watch": "ava --watch",
@@ -35,8 +29,8 @@
     "retract": "npm run cli -- retract",
     "select": "npm run cli -- select",
     "subscribe": "npm run cli -- subscribe",
-    "dev": "npm-run-all --parallel build:watch test:watch",
-    "prepublishOnly": "npm-run-all format build test"
+    "dev": "npm-run-all --parallel test:watch",
+    "prepublishOnly": "npm-run-all format test"
   },
   "dependencies": {
     "ava": "^4.3.0",

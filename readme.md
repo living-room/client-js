@@ -123,7 +123,8 @@ from [examples/animals/animals.js](./examples/animals/animals.js)
 // This is a demo of subscribing to a server query.
 // It queries for animals in the database and draws them on screen.
 
-const room = new window.LivingRoom() // assumes RoomDB http server running on http://localhost:3000
+import LivingRoom from './src/room.js'
+const room = new LivingRoom() // assumes RoomDB http server running on http://localhost:3000
 const context = canvas.getContext('2d')
 let characters = new Map()
 let animalFacts = []

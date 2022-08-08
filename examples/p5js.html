@@ -2,9 +2,10 @@
 <html>
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js"></script>
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <script src="./src/room.browser.js"></script>
-    <script>
+
+    <script type=module>
+        import LivingRoom from './src/room.js'
+
         let animals, client
 
         function setAnimal(animal) {
@@ -27,7 +28,7 @@
 
         function setup() {
             animals = new Map()
-            client = new window.LivingRoom(`http://localhost:3000`)
+            client = new LivingRoom(`http://localhost:3000`)
             client.facts().then(console.dir)
 
             createCanvas(window.innerWidth, window.innerHeight)
