@@ -72,14 +72,12 @@ export default class Room {
    */
   subscribe (...facts) {
     const callback = facts.splice(facts.length - 1)[0]
-    const subscription = JSON.stringify(facts)
-    // console.log({ subscription, callback })
 
     return new Promise((resolve, reject) => {
       this._socket.on('error', reject)
       this._socket.on('subscribe', resolve)
 
-      this._socket.on(subscription, results => {
+      this._socket.on(facts, results => {
         // this.facts().then(f => console.log(f))
         // console.log({ results })
         const unwrappedResults = this._unwrap(results)
