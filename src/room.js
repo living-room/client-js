@@ -100,8 +100,10 @@ export default class Room {
     const messages = this._messages.splice(0, this._messages.length)
 
     return Promise.all(messages.map(verb => {
-      if (verb.assert) return this._socket.emit('assert', verb.assert)
-      if (verb.retract) return this._socket.emit('retract', verb.retract)
+      return new Promise((resolve) => {
+        if (verb.assert) this._socket.emit('assert', verb.assert, resolve)
+        if (verb.retract) this._socket.emit('retract', verb.retract, resolve)
+      })
     }))
   }
 
